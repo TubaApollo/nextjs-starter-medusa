@@ -4,6 +4,7 @@ import { Popover, PopoverPanel, Transition } from "@headlessui/react"
 import { ArrowRightMini, XMark } from "@medusajs/icons"
 import { Text, clx, useToggleState } from "@medusajs/ui"
 import { Fragment } from "react"
+import { FaBars } from "react-icons/fa" // Import Font Awesome bars icon
 
 import LocalizedClientLink from "@modules/common/components/localized-client-link"
 import CountrySelect from "../country-select"
@@ -30,7 +31,7 @@ const SideMenu = ({ regions }: { regions: HttpTypes.StoreRegion[] | null }) => {
                   data-testid="nav-menu-button"
                   className="relative h-full flex items-center transition-all ease-out duration-200 focus:outline-none hover:text-ui-fg-base"
                 >
-                  Menu
+                  <FaBars size={22} aria-label="Menü öffnen" />
                 </Popover.Button>
               </div>
 
@@ -55,20 +56,18 @@ const SideMenu = ({ regions }: { regions: HttpTypes.StoreRegion[] | null }) => {
                       </button>
                     </div>
                     <ul className="flex flex-col gap-6 items-start justify-start">
-                      {Object.entries(SideMenuItems).map(([name, href]) => {
-                        return (
-                          <li key={name}>
-                            <LocalizedClientLink
-                              href={href}
-                              className="text-3xl leading-10 hover:text-ui-fg-disabled"
-                              onClick={close}
-                              data-testid={`${name.toLowerCase()}-link`}
-                            >
-                              {name}
-                            </LocalizedClientLink>
-                          </li>
-                        )
-                      })}
+                      {Object.entries(SideMenuItems).map(([name, href]) => (
+                        <li key={name}>
+                          <LocalizedClientLink
+                            href={href}
+                            className="text-3xl leading-10 hover:text-ui-fg-disabled"
+                            onClick={close}
+                            data-testid={`${name.toLowerCase()}-link`}
+                          >
+                            {name}
+                          </LocalizedClientLink>
+                        </li>
+                      ))}
                     </ul>
                     <div className="flex flex-col gap-y-6">
                       <div

@@ -1,15 +1,24 @@
 import { listCategories } from "@lib/data/categories"
 import { listCollections } from "@lib/data/collections"
 import { Text, clx } from "@medusajs/ui"
+import { listRegions } from "@lib/data/regions"
+import { HttpTypes } from "@medusajs/types"
 
 import LocalizedClientLink from "@modules/common/components/localized-client-link"
-import MedusaCTA from "@modules/layout/components/medusa-cta"
+import Facebook from "@modules/common/icons/facebook"
+import Instagram from "@modules/common/icons/instagram"
+import Twitter from "@modules/common/icons/twitter"
+import FooterRegionSelector from "./region-selector"
+import { CookiePreferencesButton } from "@modules/cookieconsent/CookiePreferencesButton"
 
 export default async function Footer() {
   const { collections } = await listCollections({
     fields: "*products",
   })
   const productCategories = await listCategories()
+  const regions = await listRegions().then(
+    (regions: HttpTypes.StoreRegion[]) => regions
+  )
 
   return (
     <footer className="border-t border-ui-border-base w-full">
@@ -34,9 +43,7 @@ export default async function Footer() {
                   data-testid="footer-categories"
                 >
                   {productCategories?.slice(0, 6).map((c) => {
-                    if (c.parent_category) {
-                      return
-                    }
+                    if (c.parent_category) return null
 
                     const children =
                       c.category_children?.map((child) => ({
@@ -62,18 +69,17 @@ export default async function Footer() {
                         </LocalizedClientLink>
                         {children && (
                           <ul className="grid grid-cols-1 ml-3 gap-2">
-                            {children &&
-                              children.map((child) => (
-                                <li key={child.id}>
-                                  <LocalizedClientLink
-                                    className="hover:text-ui-fg-base"
-                                    href={`/categories/${child.handle}`}
-                                    data-testid="category-link"
-                                  >
-                                    {child.name}
-                                  </LocalizedClientLink>
-                                </li>
-                              ))}
+                            {children.map((child) => (
+                              <li key={child.id}>
+                                <LocalizedClientLink
+                                  className="hover:text-ui-fg-base"
+                                  href={`/categories/${child.handle}`}
+                                  data-testid="category-link"
+                                >
+                                  {child.name}
+                                </LocalizedClientLink>
+                              </li>
+                            ))}
                           </ul>
                         )}
                       </li>
@@ -109,47 +115,84 @@ export default async function Footer() {
               </div>
             )}
             <div className="flex flex-col gap-y-2">
-              <span className="txt-small-plus txt-ui-fg-base">Medusa</span>
+              <span className="txt-small-plus txt-ui-fg-base">Rechtliches</span>
               <ul className="grid grid-cols-1 gap-y-2 text-ui-fg-subtle txt-small">
                 <li>
-                  <a
-                    href="https://github.com/medusajs"
-                    target="_blank"
-                    rel="noreferrer"
+                  <LocalizedClientLink
                     className="hover:text-ui-fg-base"
+                    href="/impressum"
                   >
-                    GitHub
-                  </a>
+                    Impressum
+                  </LocalizedClientLink>
                 </li>
                 <li>
-                  <a
-                    href="https://docs.medusajs.com"
-                    target="_blank"
-                    rel="noreferrer"
+                  <LocalizedClientLink
                     className="hover:text-ui-fg-base"
+                    href="/datenschutz"
                   >
-                    Documentation
-                  </a>
+                    Datenschutzerklärung
+                  </LocalizedClientLink>
                 </li>
                 <li>
-                  <a
-                    href="https://github.com/medusajs/nextjs-starter-medusa"
-                    target="_blank"
-                    rel="noreferrer"
+                  <LocalizedClientLink
                     className="hover:text-ui-fg-base"
+                    href="/agb"
                   >
-                    Source code
-                  </a>
+                    AGB
+                  </LocalizedClientLink>
+                </li>
+                <li>
+                  <LocalizedClientLink
+                    className="hover:text-ui-fg-base"
+                    href="/widerruf"
+                  >
+                    Widerrufsbelehrung
+                  </LocalizedClientLink>
                 </li>
               </ul>
             </div>
           </div>
         </div>
+
+
+        {/* Region Selector */}
+        <FooterRegionSelector regions={regions} />
+
+        {/* Cookie Preferences Button */}
+        <div className="mb-4">
+          <CookiePreferencesButton />
+        </div>
+        
         <div className="flex w-full mb-16 justify-between text-ui-fg-muted">
           <Text className="txt-compact-small">
             © {new Date().getFullYear()} Medusa Store. All rights reserved.
           </Text>
-          <MedusaCTA />
+          <div className="flex gap-x-4">
+            <a
+              href="https://www.facebook.com"
+              target="_blank"
+              rel="noreferrer"
+              className="hover:text-ui-fg-base"
+            >
+              <Facebook />
+            </a>
+            <a
+              href="https://www.instagram.com"
+              target="_blank"
+              rel="noreferrer"
+              className="hover:text-ui-fg-base"
+            >
+              <Instagram />
+            </a>
+            <a
+              href="https://www.twitter.com"
+              target="_blank"
+              rel="noreferrer"
+              className="hover:text-ui-fg-base"
+            >
+              <Twitter />
+            </a>
+          </div>
         </div>
       </div>
     </footer>
