@@ -25,6 +25,8 @@
     "@use-gesture/react": "^10.3.1",
     "daisyui": "^5.0.50",
     "keen-slider": "^6.8.6",
+    "@meilisearch/instant-meilisearch": "^0.7.1",
+    "react-instantsearch-hooks-web": "^6.29.0",
     "lodash": "^4.17.21",
     "next": "^15.3.1",
     "pg": "^8.11.3",
