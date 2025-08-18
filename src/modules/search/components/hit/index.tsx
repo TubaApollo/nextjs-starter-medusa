@@ -7,6 +7,7 @@ export type ProductHit = {
   title: string
   handle: string
   thumbnail: string
+  variant_sku?: string
 }
 
 type HitProps = {
@@ -33,6 +34,11 @@ const Hit = ({ hit, cheapestPrice, loading, error }: HitProps) => {
         </div>
         <div className="flex flex-col justify-between">
           <span className="text-base-regular font-semibold">{hit.title}</span>
+          {hit.variant_sku && (
+            <span className="text-small-regular text-ui-fg-subtle">
+              Artikelnummer: {hit.variant_sku}
+            </span>
+          )}
           
           {loading && <div className="w-20 h-4 bg-gray-200 animate-pulse" />}
           {error && (

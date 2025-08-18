@@ -1,5 +1,6 @@
 "use server"
 
+import { HttpTypes } from "@medusajs/types"
 import { sdk } from "@lib/config"
 import { getProductPrice } from "@lib/util/get-product-price"
 import { getOrSetCart } from "@lib/data/cart"
@@ -22,5 +23,21 @@ export async function getCheapestProductPrice(productId: string, countryCode: st
   } catch (error: any) {
     console.error("Error fetching product details in server action:", error)
     throw new Error(`Failed to fetch product details: ${error.message}`)
+  }
+}
+
+// Server action to fetch products by category
+export async function fetchProductsByCategory(categoryId: string, regionId: string): Promise<HttpTypes.StoreProduct[]> {
+  try {
+    const { products } = await sdk.store.product.list({
+      category_id: categoryId,
+      region_id: regionId,
+      limit: 1,
+    })
+    
+    return products || []
+  } catch (error) {
+    console.error("Failed to fetch products:", error)
+    return []
   }
 }
