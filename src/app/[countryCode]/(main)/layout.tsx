@@ -26,23 +26,21 @@ export default async function PageLayout(props: { children: React.ReactNode }) {
   }
 
   return (
-    <ModalProvider>
-      <>
-        <Nav />
-        {customer && cart && (
-          <CartMismatchBanner customer={customer} cart={cart} />
-        )}
+    <>
+      <Nav />
+      {customer && cart && (
+        <CartMismatchBanner customer={customer} cart={cart} />
+      )}
 
-        {cart && (
-          <FreeShippingPriceNudge
-            variant="popup"
-            cart={cart}
-            shippingOptions={shippingOptions}
-          />
-        )}
-        {props.children}
-        <Footer />
-      </>
-    </ModalProvider>
+      {cart && (
+        <FreeShippingPriceNudge
+          variant="popup"
+          cart={cart}
+          shippingOptions={shippingOptions}
+        />
+      )}
+      {props.children}
+      <Footer />
+    </>
   )
 }

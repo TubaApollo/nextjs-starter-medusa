@@ -1,27 +1,24 @@
 "use client"
 
 import { useState, useCallback, useRef, useEffect } from "react"
-import { ModalProvider } from "@lib/context/modal-context"
-import SearchModal from "@modules/search/templates/search-modal"
-import { FaSearch } from "react-icons/fa"
-import { InstantSearch } from "react-instantsearch-hooks-web"
+import { motion, AnimatePresence } from "framer-motion"
+import { MagnifyingGlassIcon } from "@heroicons/react/24/outline"
+import { InstantSearch, SearchBox as AlgoliaSearchBox } from "react-instantsearch"
 import { searchClient, SEARCH_INDEX_NAME } from "@lib/search-client"
-import SearchBox from "@modules/search/components/search-box"
-import Hits from "@modules/search/components/hits"
-import Hit from "@modules/search/components/hit"
+import SearchResults from "@modules/search/components/SearchResults"
 
 const SearchWrapper = () => {
   const [showDesktopResults, setShowDesktopResults] = useState(false)
-  const desktopSearchRef = useRef<HTMLDivElement>(null)
+  const [hasResults, setHasResults] = useState(true)
+  const inputWrapperRef = useRef<HTMLDivElement>(null)
 
-  const handleDesktopSearchFocus = useCallback(() => {
-    setShowDesktopResults(true)
-  }, [])
-
-  const handleDesktopSearchBlur = useCallback((event: React.FocusEvent<HTMLInputElement>) => {
-    // Delay hiding to allow click on results
+  const handleFocus = useCallback(() => setShowDesktopResults(true), [])
+  const handleBlur = useCallback((event: React.FocusEvent<HTMLInputElement>) => {
     setTimeout(() => {
-      if (desktopSearchRef.current && !desktopSearchRef.current.contains(event.relatedTarget as Node)) {
+      if (
+        inputWrapperRef.current &&
+        !inputWrapperRef.current.contains(event.relatedTarget as Node)
+      ) {
         setShowDesktopResults(false)
       }
     }, 100)
@@ -29,32 +26,44 @@ const SearchWrapper = () => {
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
-      if (desktopSearchRef.current && !desktopSearchRef.current.contains(event.target as Node)) {
+      if (inputWrapperRef.current && !inputWrapperRef.current.contains(event.target as Node)) {
         setShowDesktopResults(false)
       }
     }
 
     document.addEventListener("mousedown", handleClickOutside)
-    return () => {
-      document.removeEventListener("mousedown", handleClickOutside)
-    }
+    return () => document.removeEventListener("mousedown", handleClickOutside)
   }, [])
 
   return (
-    <div className="relative w-full lg:w-96" ref={desktopSearchRef}>
-      <InstantSearch searchClient={searchClient} indexName={SEARCH_INDEX_NAME}>
-        <div className="relative flex items-center bg-white rounded-full shadow-lg focus-within:ring-2 focus-within:ring-ui-primary transition-all duration-200 ease-in-out hover:shadow-xl">
-          <SearchBox
-            onFocus={handleDesktopSearchFocus}
-            onBlur={handleDesktopSearchBlur}
-            className="w-full py-2 px-4 text-sm bg-transparent placeholder:text-ui-fg-base focus:outline-none"
-            showMobileIcon={false}
+    <div className="w-full flex justify-center">
+      <InstantSearch searchClient={searchClient as any} indexName={SEARCH_INDEX_NAME}>
+        <div className="relative inline-block w-full max-w-2xl" ref={inputWrapperRef}>
+          <MagnifyingGlassIcon className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+          <AlgoliaSearchBox
+            placeholder="Search products..."
+            classNames={{
+              input:
+                "w-full py-3 pl-10 pr-4 text-gray-700 bg-white border border-gray-300 rounded-full focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-transparent",
+              submit: "hidden",
+              reset: "hidden",
+            }}
+            onFocus={handleFocus}
+            onBlur={handleBlur}
           />
-          {showDesktopResults && (
-            <div className="absolute top-full left-0 w-full bg-white border border-ui-border-base shadow-lg rounded-md mt-2 z-50 max-h-96 overflow-y-auto transition-all duration-200 ease-in-out transform origin-top scale-y-100 opacity-100 max-w-lg">
-              <Hits hitComponent={Hit} />
-            </div>
-          )}
+
+          <AnimatePresence>
+            {showDesktopResults && hasResults && (
+              <motion.div
+                initial={{ opacity: 0, y: -10 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -10 }}
+                className="absolute top-full inset-x-0 -mx-5 mt-2 bg-white border border-gray-200 rounded-lg shadow-lg z-50"
+              >
+                <SearchResults />
+              </motion.div>
+            )}
+          </AnimatePresence>
         </div>
       </InstantSearch>
     </div>

@@ -1,3 +1,4 @@
+
 import { Suspense } from "react"
 import { listRegions } from "@lib/data/regions"
 import { StoreRegion } from "@medusajs/types"
@@ -32,14 +33,24 @@ export default async function Nav() {
 
           {/* Middle: Search (wider) */}
           <div className="flex-1 flex justify-center">
-            <div className="hidden xl:flex w-full max-w-md"> {/* Wider search on desktop */}
+            <div className="hidden xl:flex w-full max-w-full"> {/* Wider search on desktop */}
               <SearchWrapper />
             </div>
           </div>
 
           {/* Right: Kundencenter, Mobile Search, Mobile Account, and Cart */}
-          <div className="flex items-center gap-x-6 h-full flex-1 basis-0 justify-end">
-            <div className="hidden small:flex items-center gap-x-2 h-full">
+          <div className="flex items-center gap-x-4 h-full flex-1 basis-0 justify-end"> {/* Changed gap-x-6 to gap-x-4 */}
+            <div className="hidden small:flex items-center gap-x-6 h-full">
+              {process.env.NEXT_PUBLIC_FEATURE_SEARCH_ENABLED && (
+                <LocalizedClientLink
+                  className="hover:text-ui-fg-base"
+                  href="/search"
+                  scroll={false}
+                  data-testid="nav-search-link"
+                >
+                  Search
+                </LocalizedClientLink>
+              )}
               <LocalizedClientLink
                 className="hover:text-ui-fg-base flex items-center gap-1"
                 href="/account"
@@ -70,4 +81,3 @@ export default async function Nav() {
     </div>
   )
 }
-

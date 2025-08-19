@@ -1,5 +1,11 @@
-import SearchModal from "@modules/search/templates/search-modal"
+"use client"
 
-export default function SearchModalRoute() {
-  return <SearchModal />
+import SearchWrapper from "@modules/layout/components/search-wrapper"
+
+export default function SearchPage() {
+  return (
+    <div className="flex justify-center items-center min-h-screen">
+      <SearchWrapper />
+    </div>
+  )
 }

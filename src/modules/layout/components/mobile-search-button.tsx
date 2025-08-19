@@ -1,18 +1,13 @@
 "use client"
 
-import { useState } from "react"
 import { FaSearch } from "react-icons/fa"
-import SearchModal from "@modules/search/templates/search-modal"
+import { useSearchModal } from "@lib/context/search-modal-context" // Add this import
 
 export default function MobileSearchButton() {
-  const [showModal, setShowModal] = useState(false)
+  const { setSearchOpen } = useSearchModal() // Use context
 
-  const handleOpenModal = () => {
-    setShowModal(true)
-  }
-
-  const handleCloseModal = () => {
-    setShowModal(false)
+  const handleSearchClick = () => {
+    setSearchOpen(true) // Open the search modal
   }
 
   return (
@@ -20,12 +15,11 @@ export default function MobileSearchButton() {
       <div className="xl:hidden flex items-center">
         <button
           className="text-ui-fg-base hover:text-ui-fg-subtle"
-          onClick={handleOpenModal}
+          onClick={handleSearchClick}
         >
           <FaSearch size={18} aria-hidden="true" />
         </button>
       </div>
-      {showModal && <SearchModal onClose={handleCloseModal} />} 
     </>
   )
 }

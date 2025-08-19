@@ -1,59 +1,51 @@
-import Image from "next/image"
-import Link from "next/link"
+import { Container, Text } from "@medusajs/ui"
+
+import Thumbnail from "@modules/products/components/thumbnail"
+import LocalizedClientLink from "@modules/common/components/localized-client-link"
+import { HttpTypes } from "@medusajs/types"
 
 export type ProductHit = {
-  objectID: string
   id: string
   title: string
   handle: string
-  thumbnail: string
-  variant_sku?: string
+  description: string | null
+  thumbnail: string | null
+  variants: HttpTypes.StoreProductVariant[]
+  collection_handle: string | null
+  collection_id: string | null
 }
 
 type HitProps = {
   hit: ProductHit
-  cheapestPrice?: any
-  loading?: boolean
-  error?: string | null
 }
 
-const Hit = ({ hit, cheapestPrice, loading, error }: HitProps) => {
+const Hit = ({ hit }: HitProps) => {
   return (
-    <Link href={`/products/${hit.handle}`}>
-      <div className="grid grid-cols-[1fr_4fr] gap-4">
-        <div className="relative w-full aspect-square">
-          {hit.thumbnail && (
-            <Image
-              src={hit.thumbnail}
-              alt={hit.title}
-              layout="fill"
-              objectFit="cover"
-              className="rounded-md"
-            />
-          )}
+    <LocalizedClientLink
+      href={`/products/${hit.handle}`}
+      data-testid="search-result"
+    >
+      <Container
+        key={hit.id}
+        className="flex sm:flex-col gap-2 w-full p-4 shadow-elevation-card-rest hover:shadow-elevation-card-hover items-center sm:justify-center"
+      >
+        <Thumbnail
+          thumbnail={hit.thumbnail}
+          size="square"
+          className="group h-12 w-12 sm:h-full sm:w-full"
+        />
+        <div className="flex flex-col justify-between group">
+          <div className="flex flex-col">
+            <Text
+              className="text-ui-fg-subtle"
+              data-testid="search-result-title"
+            >
+              {hit.title}
+            </Text>
+          </div>
         </div>
-        <div className="flex flex-col justify-between">
-          <span className="text-base-regular font-semibold">{hit.title}</span>
-          {hit.variant_sku && (
-            <span className="text-small-regular text-ui-fg-subtle">
-              Artikelnummer: {Array.isArray(hit.variant_sku) ? hit.variant_sku[0] : hit.variant_sku}
-            </span>
-          )}
-          
-          {loading && <div className="w-20 h-4 bg-gray-200 animate-pulse" />}
-          {error && (
-            <div className="flex items-center space-x-2">
-              <span className="text-small-regular text-red-500">{error}</span>
-            </div>
-          )}
-          {cheapestPrice && (
-            <span className="text-small-regular text-ui-fg-subtle">
-              {cheapestPrice.calculated_price}
-            </span>
-          )}
-        </div>
-      </div>
-    </Link>
+      </Container>
+    </LocalizedClientLink>
   )
 }
 
