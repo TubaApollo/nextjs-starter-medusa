@@ -34,6 +34,21 @@ module.exports = {
           80: "#1F2937",
           90: "#111827",
         },
+        // Custom Colors from your design system
+        'industrial-red': {
+          DEFAULT: '#E53935',
+          dark: '#C62828',
+          light: '#FFEBEE',
+        },
+        'steel-gray': {
+          DEFAULT: '#37474F',
+          light: '#546E7A',
+        },
+        'metal-silver': '#ECEFF1',
+        white: '#FFFFFF', // Already defined, but ensuring consistency
+        'warning-orange': '#FF7043',
+        'success-green': '#43A047',
+        'info-blue': '#1E88E5',
       },
       borderRadius: {
         none: "0px",
@@ -42,6 +57,11 @@ module.exports = {
         rounded: "8px",
         large: "16px",
         circle: "9999px",
+        // Custom Border Radius from your design system
+        sm: '0.25rem',
+        md: '0.5rem',
+        lg: '0.75rem',
+        xl: '1rem',
       },
       maxWidth: {
         "8xl": "100rem",
@@ -57,20 +77,48 @@ module.exports = {
       },
       fontSize: {
         "3xl": "2rem",
+        // Custom Font Sizes from your design system
+        xs: '0.75rem',
+        sm: '0.875rem',
+        base: '1rem',
+        lg: '1.125rem',
+        xl: '1.25rem',
+        '2xl': '1.5rem',
+        '3xl': '1.875rem',
+        '4xl': '2.25rem',
+        '5xl': '3rem',
       },
       fontFamily: {
         sans: [
-          "Inter",
-          "-apple-system",
-          "BlinkMacSystemFont",
-          "Segoe UI",
-          "Roboto",
-          "Helvetica Neue",
-          "Ubuntu",
-          "sans-serif",
+          'Inter',
+          'Segoe UI',
+          '-apple-system',
+          'BlinkMacSystemFont',
+          'sans-serif',
         ],
       },
-     keyframes: {
+      spacing: {
+        // Custom Spacing from your design system
+        '1': '0.25rem',
+        '2': '0.5rem',
+        '3': '0.75rem',
+        '4': '1rem',
+        '5': '1.25rem',
+        '6': '1.5rem',
+        '8': '2rem',
+        '10': '2.5rem',
+        '12': '3rem',
+        '16': '4rem',
+        '20': '5rem',
+      },
+      boxShadow: {
+        // Custom Shadows from your design system
+        sm: '0 1px 2px rgba(0, 0, 0, 0.05)',
+        md: '0 4px 6px rgba(0, 0, 0, 0.07)',
+        lg: '0 10px 15px rgba(0, 0, 0, 0.1)',
+        xl: '0 20px 25px rgba(0, 0, 0, 0.1)',
+      },
+      keyframes: {
         ring: {
           "0%": { transform: "rotate(0deg)" },
           "100%": { transform: "rotate(360deg)" },

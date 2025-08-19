@@ -110,3 +110,42 @@
     @apply text-[32px] leading-[44px] font-semibold;
   }
 }
+
+body {
+  @apply font-sans;
+}
+
+@layer components {
+  /* Custom Components from your design system */
+  .btn-primary {
+    @apply bg-industrial-red text-white py-3 px-6 rounded-md font-medium transition-all duration-200 ease-in-out border-none;
+  }
+
+  .btn-primary:hover {
+    @apply bg-industrial-red-dark -translate-y-px shadow-md;
+  }
+
+  .btn-secondary {
+    @apply bg-transparent text-steel-gray border-2 border-metal-silver py-3 px-6 rounded-md font-medium transition-all duration-200 ease-in-out;
+  }
+
+  .btn-secondary:hover {
+    @apply border-industrial-red text-industrial-red;
+  }
+
+  .card {
+    @apply bg-white rounded-lg shadow-sm p-6 transition-all duration-200 ease-in-out border border-metal-silver;
+  }
+
+  .card:hover {
+    @apply shadow-md -translate-y-0.5;
+  }
+
+  .input {
+    @apply border-2 border-metal-silver rounded-md py-3 px-4 text-base transition-all duration-200 ease-in-out bg-white;
+  }
+
+  .input:focus {
+    @apply border-industrial-red outline-none shadow-industrial-red-light; /* Using a custom shadow utility for focus */
+  }
+}

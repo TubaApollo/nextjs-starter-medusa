@@ -36,7 +36,7 @@ const Hit = ({ hit, cheapestPrice, loading, error }: HitProps) => {
           <span className="text-base-regular font-semibold">{hit.title}</span>
           {hit.variant_sku && (
             <span className="text-small-regular text-ui-fg-subtle">
-              Artikelnummer: {hit.variant_sku}
+              Artikelnummer: {Array.isArray(hit.variant_sku) ? hit.variant_sku[0] : hit.variant_sku}
             </span>
           )}
           
