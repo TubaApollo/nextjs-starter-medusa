@@ -1,13 +1,13 @@
 "use client"
 
-import { FaSearch } from "react-icons/fa"
-import { useSearchModal } from "@lib/context/search-modal-context" // Add this import
+import { MagnifyingGlassIcon } from "@heroicons/react/24/outline"
 
 export default function MobileSearchButton() {
-  const { setSearchOpen } = useSearchModal() // Use context
-
   const handleSearchClick = () => {
-    setSearchOpen(true) // Open the search modal
+    // Dispatch global event listened by SearchWrapper to open overlay
+    if (typeof window !== 'undefined') {
+      window.dispatchEvent(new Event('open-search-overlay'))
+    }
   }
 
   return (
@@ -17,7 +17,7 @@ export default function MobileSearchButton() {
           className="text-ui-fg-base hover:text-ui-fg-subtle"
           onClick={handleSearchClick}
         >
-          <FaSearch size={18} aria-hidden="true" />
+          <MagnifyingGlassIcon className="w-5 h-5" aria-hidden="true" />
         </button>
       </div>
     </>

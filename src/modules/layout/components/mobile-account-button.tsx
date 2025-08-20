@@ -1,7 +1,7 @@
 "use client"
 
 import LocalizedClientLink from "@modules/common/components/localized-client-link"
-import { FaUser } from "react-icons/fa"
+import { UserIcon } from "@heroicons/react/24/outline"
 
 export default function MobileAccountButton() {
   return (
@@ -11,7 +11,7 @@ export default function MobileAccountButton() {
         href="/account"
         data-testid="nav-account-link"
       >
-        <FaUser size={18} aria-hidden="true" />
+        <UserIcon className="w-5 h-5" aria-hidden="true" />
       </LocalizedClientLink>
     </div>
   )

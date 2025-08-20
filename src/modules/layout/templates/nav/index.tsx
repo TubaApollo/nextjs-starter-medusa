@@ -6,9 +6,9 @@ import LocalizedClientLink from "@modules/common/components/localized-client-lin
 import CartButton from "@modules/layout/components/cart-button"
 import SideMenu from "@modules/layout/components/side-menu"
 import SearchWrapper from "@modules/layout/components/search-wrapper"
-import MobileSearchButton from "@modules/layout/components/mobile-search-button" // Import MobileSearchButton
+import MobileSearchButton from "@modules/layout/components/mobile-search-button"
 import MobileAccountButton from "@modules/layout/components/mobile-account-button" // Import MobileAccountButton
-import { FaUser } from "react-icons/fa" // Import FaUser
+import { UserIcon } from "@heroicons/react/24/outline"
 
 export default async function Nav() {
   const regions = await listRegions().then((regions: StoreRegion[]) => regions)
@@ -31,9 +31,9 @@ export default async function Nav() {
             </LocalizedClientLink>
           </div>
 
-          {/* Middle: Search (wider) */}
+          {/* Middle: Search (shows on all breakpoints; SearchWrapper handles mobile overlay) */}
           <div className="flex-1 flex justify-center">
-            <div className="hidden xl:flex w-full max-w-full"> {/* Wider search on desktop */}
+            <div className="flex w-full max-w-full">
               <SearchWrapper />
             </div>
           </div>
@@ -56,12 +56,12 @@ export default async function Nav() {
                 href="/account"
                 data-testid="nav-account-link"
               >
-                <FaUser size={18} aria-hidden="true" /> {/* Add FaUser icon */}
+                <UserIcon className="w-5 h-5" aria-hidden="true" />
                 <span>Kundencenter</span>
               </LocalizedClientLink>
             </div>
-            <MobileAccountButton /> {/* Add MobileAccountButton here */}
-            <MobileSearchButton /> {/* Move MobileSearchButton here */}
+            <MobileAccountButton /> {/* Mobile account button remains */}
+            <MobileSearchButton /> {/* Mobile search icon opens overlay */}
             <Suspense
               fallback={
                 <LocalizedClientLink

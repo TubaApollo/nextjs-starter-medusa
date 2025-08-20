@@ -9,15 +9,12 @@ export const metadata: Metadata = {
 }
 
 import { SearchModalProvider } from "@lib/context/search-modal-context"; // Add this import
-import SearchBox from "@modules/search/components/SearchBox"; // Import SearchBox
-
 export default function RootLayout(props: { children: React.ReactNode }) {
   return (
     <html lang="en" data-mode="light">
       <body>
         <SearchModalProvider> {/* Wrap with SearchModalProvider */}
           <main className="relative">{props.children}</main>
-          <SearchBox /> {/* Render SearchBox globally */}
         </SearchModalProvider>
         <CookieConsentComponent />
       </body>

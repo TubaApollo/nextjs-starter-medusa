@@ -6,12 +6,19 @@ const endpoint =
 
 const apiKey = process.env.NEXT_PUBLIC_SEARCH_API_KEY || "test_key"
 
-export const searchClient: SearchClient = {
-  ...instantMeiliSearch(endpoint, apiKey).searchClient,
-  search(requests) {
-    return instantMeiliSearch(endpoint, apiKey).searchClient.search(requests)
-  },
-}
+// Create a single instance and reuse it to avoid recreating clients per search
+const ims = instantMeiliSearch(endpoint, apiKey)
+const client = ims.searchClient as unknown as SearchClient
 
+export const searchClient: SearchClient = client
+
+// Prefer the Meilisearch-specific env vars, fallback to legacy names
 export const SEARCH_INDEX_NAME =
-  process.env.NEXT_PUBLIC_INDEX_NAME || "products"
+  process.env.NEXT_PUBLIC_MEILISEARCH_PRODUCTS_INDEX ||
+  process.env.NEXT_PUBLIC_INDEX_NAME ||
+  "products"
+
+export const CATEGORY_INDEX_NAME =
+  process.env.NEXT_PUBLIC_MEILISEARCH_CATEGORIES_INDEX ||
+  process.env.NEXT_PUBLIC_CATEGORY_INDEX_NAME ||
+  "product_categories"

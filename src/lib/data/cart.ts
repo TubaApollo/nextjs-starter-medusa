@@ -73,15 +73,60 @@ export async function getOrSetCart(countryCode: string) {
 
     await setCartId(cart.id)
 
+    // Set shipping country on a fresh cart so taxes are computed correctly
+    try {
+      await sdk.store.cart.update(
+        cart.id,
+        { shipping_address: { country_code: countryCode.toLowerCase() } },
+        {},
+        headers
+      )
+    } catch (_) {}
+
     const cartCacheTag = await getCacheTag("carts")
     revalidateTag(cartCacheTag)
   }
 
+  // If region differs, update region and ensure shipping country matches path
   if (cart && cart?.region_id !== region.id) {
-    await sdk.store.cart.update(cart.id, { region_id: region.id }, {}, headers)
+    await sdk.store.cart.update(
+      cart.id,
+      { region_id: region.id, shipping_address: { country_code: countryCode.toLowerCase() } },
+      {},
+      headers
+    )
     const cartCacheTag = await getCacheTag("carts")
     revalidateTag(cartCacheTag)
+  } else if (
+    cart &&
+    (cart.shipping_address?.country_code?.toLowerCase() !== countryCode.toLowerCase())
+  ) {
+    // Region is correct but shipping country is missing or mismatched
+    try {
+      await sdk.store.cart.update(
+        cart.id,
+        { shipping_address: { country_code: countryCode.toLowerCase() } },
+        {},
+        headers
+      )
+      const cartCacheTag = await getCacheTag("carts")
+      revalidateTag(cartCacheTag)
+    } catch (_) {}
   }
+
+  // Ensure a shipping method is selected in the cart so totals include shipping
+  try {
+    // Refresh cart state
+    const freshCart = await retrieveCart(cart?.id)
+    const hasMethod = (freshCart?.shipping_methods?.length || 0) > 0
+    if (!hasMethod && freshCart?.id) {
+      const { shipping_options } = await listCartOptions()
+      const first = shipping_options?.[0]
+      if (first?.id) {
+        await setShippingMethod({ cartId: freshCart.id, shippingMethodId: first.id })
+      }
+    }
+  } catch (_) {}
 
   return cart
 }

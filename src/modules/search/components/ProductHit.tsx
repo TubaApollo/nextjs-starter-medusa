@@ -13,7 +13,6 @@ interface ProductHitProps {
 }
 
 const ProductHitComponent = ({ hit }: ProductHitProps) => {
-  console.log("Product Hit:", hit);
   const formatPrice = (price: any): string => {
     if (!price || price <= 0) return "Price on request"
     return new Intl.NumberFormat("de-DE", {
@@ -48,16 +47,18 @@ const ProductHitComponent = ({ hit }: ProductHitProps) => {
           <h4 className="font-medium text-gray-900 dark:text-white group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors text-sm">
             {hit.title}
           </h4>
-          {hit.variant_sku && hit.variant_sku.length > 0 && (
-            <p className="text-xs text-gray-500 dark:text-gray-400">
-              Artikelnummer: {hit.variant_sku[0]}
-            </p>
-          )}
-          {hit.variants && hit.variants.length > 0 && (
-            <p className="text-xs text-gray-500 dark:text-gray-400 truncate">
-              {hit.variants[0].title}
-            </p>
-          )}
+          <div className="mt-1 text-xs text-gray-500 dark:text-gray-400 space-y-1">
+            {hit.variant_sku && hit.variant_sku.length > 0 && (
+              <div className="truncate" title={hit.variant_sku[0]}>
+                SKU: {hit.variant_sku[0]}
+              </div>
+            )}
+            {hit.variants && hit.variants.length > 0 && (
+              <div className="truncate">
+                {hit.variants[0].title}
+              </div>
+            )}
+          </div>
         </div>
         <div className="flex-shrink-0 text-right">
           {hit.min_price && (
@@ -65,7 +66,7 @@ const ProductHitComponent = ({ hit }: ProductHitProps) => {
               {formatPrice(hit.min_price ?? undefined)}
             </div>
           )}
-          {hit.variants && hit.variants.length > 0 && !hit.min_price && (
+          {hit.variants && hit.variants.length > 0 && !hit.min_price && hit.variants[0]?.prices?.[0]?.amount && (
             <div className="text-base font-semibold text-gray-900 dark:text-white">
               {formatPrice(hit.variants[0].prices[0].amount)}
             </div>

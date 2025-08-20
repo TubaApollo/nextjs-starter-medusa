@@ -16,7 +16,7 @@ import LocalizedClientLink from "@modules/common/components/localized-client-lin
 import Thumbnail from "@modules/products/components/thumbnail"
 import { usePathname } from "next/navigation"
 import { Fragment, useEffect, useRef, useState } from "react"
-import { FaShoppingCart } from "react-icons/fa"
+import { ShoppingBagIcon } from "@heroicons/react/24/outline"
 
 type CartDropdownProps = {
   cart?: HttpTypes.StoreCart | null
@@ -78,7 +78,7 @@ const CartDropdown = ({ cart: cartState }: CartDropdownProps) => {
             className="flex items-center hover:text-ui-fg-base relative"
             tabIndex={-1}
           >
-            <FaShoppingCart size={22} />
+            <ShoppingBagIcon className="w-6 h-6" />
             {totalItems > 0 && (
               <span
                 className="absolute top-0 right-0 transform translate-x-1/2 -translate-y-1/2 flex items-center justify-center bg-red-600 text-white text-xs font-semibold h-4 w-4 rounded-full"

@@ -14,7 +14,6 @@ interface CategoryHitProps {
 }
 
 const CategoryHitComponent = ({ hit }: CategoryHitProps) => {
-  console.log("Category Hit:", hit);
   return (
     <Link href={`/categories/${hit.handle}`}>
       <motion.div
@@ -41,9 +40,9 @@ const CategoryHitComponent = ({ hit }: CategoryHitProps) => {
           <h4 className="font-medium text-gray-900 dark:text-white group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
             {hit.name || "N/A"}
           </h4>
-          {hit.parent_category && (
+          {hit.parent_category?.name && (
             <p className="text-xs text-gray-500 dark:text-gray-400">
-              in {hit.parent_category.name || "N/A"}
+              in {hit.parent_category.name}
             </p>
           )}
         </div>

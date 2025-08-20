@@ -1,6 +1,6 @@
 "use client"
 import React from "react"
-import { useRouter } from "next/navigation"
+import { useRouter, useParams } from "next/navigation"
 import Image from "next/image"
 import { HttpTypes } from "@medusajs/types"
 import { motion } from "framer-motion"
@@ -21,11 +21,13 @@ const ArrowIcon: React.FC<{ className?: string }> = ({ className }) => (
 // Karten-Komponente mit verbessertem Design
 const CategoryCard: React.FC<{ category: HttpTypes.StoreProductCategory }> = ({ category }) => {
   const router = useRouter()
+  const params = useParams() as { countryCode?: string }
+  const cc = (params?.countryCode || "") as string
   const thumbnailUrl = category.metadata?.thumbnail as string | undefined
   
   return (
     <div
-      onClick={() => router.push(`/categories/${category.handle}`)}
+      onClick={() => router.push(cc ? `/${cc}/categories/${category.handle}` : `/categories/${category.handle}`)}
       className="group relative h-full w-full cursor-pointer overflow-hidden rounded-xl shadow-lg hover:shadow-xl transition-shadow duration-300"
     >
       {/* Hintergrundbild mit subtilem Zoom-Effekt */}

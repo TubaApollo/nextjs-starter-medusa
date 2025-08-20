@@ -290,7 +290,7 @@ const Hero: React.FC<HeroProps> = ({
                 onMouseEnter={() => handleCategoryHover(child.id, level + 1)}
               >
                 <Link
-                  href={`/categories/${child.handle}`}
+                  href={`/${countryCode}/categories/${child.handle}`}
                   className={`flex items-center justify-between text-sm md:text-md text-gray-700 hover:text-red-600 transition-colors ${
                     hoveredCategoryPath[level + 1] === child.id
                       ? "text-red-600 font-semibold"
@@ -322,7 +322,7 @@ const Hero: React.FC<HeroProps> = ({
         </ul>
       </motion.div>
     )
-  }, [categoryMap, hoveredCategoryPath, handleCategoryHover])
+  }, [categoryMap, hoveredCategoryPath, handleCategoryHover, countryCode])
 
   return (
     <div
@@ -344,7 +344,7 @@ const Hero: React.FC<HeroProps> = ({
                   transition={{ type: "spring", stiffness: 400, damping: 30 }}
                 >
                   <Link
-                    href={`/categories/${category.handle}`}
+                    href={`/${countryCode}/categories/${category.handle}`}
                     className={`group flex items-center justify-between text-base lg:text-lg text-gray-300 hover:text-white transition-all duration-200 py-3 px-4 rounded-lg hover:bg-slate-700/50 ${
                       hoveredCategoryPath[0] === category.id ? "text-red-500 bg-slate-700/50" : ""
                     }`}
@@ -459,7 +459,7 @@ const Hero: React.FC<HeroProps> = ({
                         {previewProduct.description}
                       </p>
                       <Link
-                        href={`/products/${previewProduct.handle}`}
+                        href={`/${countryCode}/products/${previewProduct.handle}`}
                         className="group/product-cta inline-flex items-center justify-center space-x-2 bg-red-600 hover:bg-red-500 text-white rounded-lg px-6 py-3 transition-all duration-200 hover:shadow-lg hover:shadow-red-500/25 transform hover:scale-105"
                         aria-label={`View details for ${previewProduct.title}`}
                       >

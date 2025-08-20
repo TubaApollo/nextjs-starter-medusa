@@ -4,7 +4,7 @@ import { Popover, PopoverPanel, Transition } from "@headlessui/react"
 import { ArrowRightMini, XMark } from "@medusajs/icons"
 import { Text, clx, useToggleState } from "@medusajs/ui"
 import { Fragment } from "react"
-import { FaBars } from "react-icons/fa" // Import Font Awesome bars icon
+import { Bars3Icon } from "@heroicons/react/24/outline"
 
 import LocalizedClientLink from "@modules/common/components/localized-client-link"
 import CountrySelect from "../country-select"
@@ -32,7 +32,7 @@ const SideMenu = ({ regions }: { regions: HttpTypes.StoreRegion[] | null }) => {
                   data-testid="nav-menu-button"
                   className="relative h-full flex items-center transition-all ease-out duration-200 focus:outline-none hover:text-ui-fg-base"
                 >
-                  <FaBars size={22} aria-label="Menü öffnen" />
+                  <Bars3Icon className="w-6 h-6" aria-label="Menü öffnen" />
                 </Popover.Button>
               </div>
 

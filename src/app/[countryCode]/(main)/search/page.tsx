@@ -1,11 +1,12 @@
-"use client"
+import { Suspense } from "react"
+import SearchPageTemplate from "@modules/search/templates/search-page"
 
-import SearchWrapper from "@modules/layout/components/search-wrapper"
+export const dynamic = "force-dynamic"
 
 export default function SearchPage() {
   return (
-    <div className="flex justify-center items-center min-h-screen">
-      <SearchWrapper />
-    </div>
+    <Suspense fallback={<div className="container mx-auto px-4 py-8">Loading search...</div>}>
+      <SearchPageTemplate />
+    </Suspense>
   )
 }
