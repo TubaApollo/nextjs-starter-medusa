@@ -7,7 +7,7 @@ import CartButton from "@modules/layout/components/cart-button"
 import SideMenu from "@modules/layout/components/side-menu"
 import SearchWrapper from "@modules/layout/components/search-wrapper"
 import MobileSearchButton from "@modules/layout/components/mobile-search-button"
-import MobileAccountButton from "@modules/layout/components/mobile-account-button" // Import MobileAccountButton
+import MobileAccountButton from "@modules/layout/components/mobile-account-button"
 import { UserIcon } from "@heroicons/react/24/outline"
 
 export default async function Nav() {
@@ -24,33 +24,23 @@ export default async function Nav() {
             </div>
             <LocalizedClientLink
               href="/"
-              className="txt-compact-xlarge-plus hover:text-ui-fg-base uppercase hidden xl:block" // Hide on mobile, show on desktop
+              className="txt-compact-xlarge-plus hover:text-ui-fg-base uppercase hidden xl:block"
               data-testid="nav-store-link"
             >
               Medusa Store
             </LocalizedClientLink>
           </div>
 
-          {/* Middle: Search (shows on all breakpoints; SearchWrapper handles mobile overlay) */}
-          <div className="flex-1 flex justify-center">
-            <div className="flex w-full max-w-full">
+          {/* Middle: Search (now visible on all screen sizes) */}
+          <div className="flex flex-1 justify-center">
+            <div className="flex w-full max-w-lg">
               <SearchWrapper />
             </div>
           </div>
 
           {/* Right: Kundencenter, Mobile Search, Mobile Account, and Cart */}
-          <div className="flex items-center gap-x-4 h-full flex-1 basis-0 justify-end"> {/* Changed gap-x-6 to gap-x-4 */}
-            <div className="hidden small:flex items-center gap-x-6 h-full">
-              {process.env.NEXT_PUBLIC_FEATURE_SEARCH_ENABLED && (
-                <LocalizedClientLink
-                  className="hover:text-ui-fg-base"
-                  href="/search"
-                  scroll={false}
-                  data-testid="nav-search-link"
-                >
-                  Search
-                </LocalizedClientLink>
-              )}
+          <div className="flex items-center gap-x-4 h-full flex-1 basis-0 justify-end">
+            <div className="hidden md:flex items-center gap-x-6 h-full">
               <LocalizedClientLink
                 className="hover:text-ui-fg-base flex items-center gap-1"
                 href="/account"
@@ -60,8 +50,8 @@ export default async function Nav() {
                 <span>Kundencenter</span>
               </LocalizedClientLink>
             </div>
-            <MobileAccountButton /> {/* Mobile account button remains */}
-            <MobileSearchButton /> {/* Mobile search icon opens overlay */}
+            <MobileAccountButton />
+            <MobileSearchButton /> {/* Mobile search icon - always visible on mobile */}
             <Suspense
               fallback={
                 <LocalizedClientLink

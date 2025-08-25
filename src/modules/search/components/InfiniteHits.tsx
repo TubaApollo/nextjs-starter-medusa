@@ -2,7 +2,8 @@
 
 import React, { useEffect, useRef } from "react"
 import { useInfiniteHits } from "react-instantsearch"
-import SearchPageProductHit from "./SearchPageProductHit"
+import ProductHitComponent from "./ProductHit"
+import { ProductHit } from "../../../../types/search"
 
 interface InfiniteHitsProps {
   className?: string
@@ -45,25 +46,47 @@ const InfiniteHits = ({ className = "" }: InfiniteHitsProps) => {
 
   return (
     <div className={`flex-1 ${className}`}>
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+      <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-1.5 sm:gap-4 md:gap-6 mb-3 md:mb-8">
         {hits.map((hit, index) => {
           const key = `${hit.objectID ?? "noid"}-${(hit as any).__position ?? index}`
-          return <SearchPageProductHit key={key} hit={hit as any} />
+          const productHit: ProductHit = {
+            id: hit.objectID,
+            objectID: hit.objectID,
+            title: (hit as any).title || (hit as any).name || (hit as any).display_name || (hit as any).product_title || (hit as any).handle || "Unbenanntes Produkt",
+            handle: (hit as any).handle,
+            description: (hit as any).description ?? null,
+            thumbnail: (hit as any).thumbnail ?? null,
+            min_price: (hit as any).min_price ?? null,
+            max_price: (hit as any).max_price ?? null,
+            variant_sku: (hit as any).variant_sku ?? [],
+            categories: (hit as any).categories ?? [],
+            collection_title: (hit as any).collection_title ?? null,
+            type: (hit as any).type ?? null,
+            tags: (hit as any).tags ?? [],
+            status: (hit as any).status ?? "published",
+            created_at: (hit as any).created_at ?? "",
+            updated_at: (hit as any).updated_at ?? "",
+            variants: (hit as any).variants ?? [],
+            __position: (hit as any).__position,
+            __queryID: (hit as any).__queryID,
+          }
+          return <ProductHitComponent key={key} hit={productHit} />
         })}
       </div>
       
       {!isLastPage && (
-        <div ref={sentinelRef} className="flex justify-center py-8">
-          <div className="flex items-center space-x-2 text-gray-600">
-            <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-gray-900"></div>
-            <span>Loading more products...</span>
+        <div ref={sentinelRef} className="flex justify-center py-4 md:py-8">
+          <div className="flex items-center space-x-2 text-gray-600 text-sm md:text-base">
+            <div className="animate-spin rounded-full h-5 w-5 md:h-6 md:w-6 border-b-2 border-gray-900"></div>
+            <span className="hidden sm:inline">Loading more products...</span>
+            <span className="sm:hidden">Loading…</span>
           </div>
         </div>
       )}
       
       {isLastPage && hits.length > 0 && (
-        <div className="text-center py-8 text-gray-500">
-          <p>You've reached the end of the results</p>
+        <div className="text-center py-4 md:py-8 text-gray-500 text-sm md:text-base">
+          <p>End of results</p>
         </div>
       )}
     </div>

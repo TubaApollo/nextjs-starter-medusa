@@ -1,12 +1,16 @@
-import { Suspense } from "react"
-import SearchPageTemplate from "@modules/search/templates/search-page"
+"use client"
 
-export const dynamic = "force-dynamic"
+import React from "react"
+import ImprovedSearchPage from "@modules/search/templates/ImprovedSearchPage"
+import styles from "./search.module.css"
 
-export default function SearchPage() {
+const SearchPage = () => {
   return (
-    <Suspense fallback={<div className="container mx-auto px-4 py-8">Loading search...</div>}>
-      <SearchPageTemplate />
-    </Suspense>
+    <div className={styles.searchPage}>
+      {/* Main search experience with enhanced filtering */}
+      <ImprovedSearchPage />
+    </div>
   )
 }
+
+export default SearchPage

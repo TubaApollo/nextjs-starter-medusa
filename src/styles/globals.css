@@ -11,6 +11,15 @@
   display: none; /* Chrome, Safari, Opera */
 }
 
+/* Alias: some components expect `scrollbar-hide` */
+.scrollbar-hide {
+  -ms-overflow-style: none; /* IE and Edge */
+  scrollbar-width: none; /* Firefox */
+}
+.scrollbar-hide::-webkit-scrollbar {
+  display: none; /* Chrome, Safari, Opera */
+}
+
 @layer utilities {
   /* Custom scrollbar styles */
   .scrollbar-thin::-webkit-scrollbar {
@@ -20,6 +29,32 @@
 
   .scrollbar-thin::-webkit-scrollbar-track {
     background: transparent;
+  }
+
+  /* Search dropdown scrollbar */
+  .search-dropdown-scroll::-webkit-scrollbar {
+    width: 6px;
+  }
+
+  .search-dropdown-scroll::-webkit-scrollbar-track {
+    background: #f3f4f6;
+    border-radius: 3px;
+    margin: 4px 0;
+  }
+
+  .search-dropdown-scroll::-webkit-scrollbar-thumb {
+    background: #d1d5db;
+    border-radius: 3px;
+    transition: background-color 0.2s ease;
+  }
+
+  .search-dropdown-scroll::-webkit-scrollbar-thumb:hover {
+    background: #9ca3af;
+  }
+
+  .search-dropdown-scroll {
+    scrollbar-width: thin;
+    scrollbar-color: #d1d5db #f3f4f6;
   }
 
   .scrollbar-thin::-webkit-scrollbar-thumb {
@@ -83,6 +118,34 @@
   input[type="search"]::-webkit-search-results-button,
   input[type="search"]::-webkit-search-results-decoration {
     -webkit-appearance: none;
+  }
+
+  /* Mobile search input improvements */
+  input[type="search"] {
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+  }
+
+  /* Improve touch targets on mobile */
+  @media (max-width: 768px) {
+    .touch-manipulation {
+      touch-action: manipulation;
+      -webkit-touch-callout: none;
+      -webkit-user-select: none;
+      -khtml-user-select: none;
+      -moz-user-select: none;
+      -ms-user-select: none;
+      user-select: none;
+    }
+    
+    input[type="search"].touch-manipulation {
+      -webkit-user-select: text;
+      -khtml-user-select: text;
+      -moz-user-select: text;
+      -ms-user-select: text;
+      user-select: text;
+    }
   }
 }
 
@@ -185,4 +248,63 @@ body {
   .input:focus {
     @apply border-industrial-red outline-none shadow-industrial-red-light; /* Using a custom shadow utility for focus */
   }
+}
+
+/* Swiper pagination theming */
+.swiper-pagination-bullet {
+  background: rgba(255, 255, 255, 0.6);
+  opacity: 1;
+  transition: width 200ms ease, background-color 200ms ease, transform 200ms ease;
+}
+.swiper-pagination-bullet:hover {
+  transform: scale(1.1);
+}
+.swiper-pagination-bullet-active {
+  background: linear-gradient(90deg, #ef4444, #f87171);
+  width: 18px;
+  border-radius: 9999px;
+  box-shadow: 0 4px 10px rgba(239, 68, 68, 0.35);
+}
+
+/* Product rail scope */
+.product-rail .swiper-pagination {
+  position: static !important; /* Place dots below the slider, not overlayed */
+  margin-top: 12px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 8px;
+}
+.product-rail .swiper-pagination-bullet {
+  width: 8px;
+  height: 8px;
+  background: rgba(15, 23, 42, 0.35);
+  opacity: 1;
+  transition: width 220ms ease, background-color 220ms ease, transform 220ms ease;
+}
+.product-rail .swiper-pagination-bullet-active {
+  background: linear-gradient(90deg, #ef4444, #f87171);
+}
+.product-rail .swiper-pagination-bullet-active-main {
+  width: 22px;
+  border-radius: 9999px;
+  background: linear-gradient(90deg, #ef4444, #f87171);
+  box-shadow: 0 4px 10px rgba(239, 68, 68, 0.25);
+}
+
+/* Hero scope */
+.hero-swiper .swiper-pagination {
+  bottom: 12px !important;
+}
+.hero-swiper .swiper-pagination-bullet {
+  background: rgba(255, 255, 255, 0.5);
+}
+.hero-swiper .swiper-pagination-bullet-active {
+  background: linear-gradient(90deg, #ef4444, #f87171);
+}
+
+/* Hide default Swiper arrow elements (we use custom buttons) */
+.swiper-button-next,
+.swiper-button-prev {
+  display: none !important;
 }

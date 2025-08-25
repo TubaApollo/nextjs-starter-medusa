@@ -9,29 +9,47 @@ export type ProductHit = Hit<BaseHit> & {
   description: string | null
   thumbnail: string | null
   min_price: number | null
+  max_price: number | null
   variant_sku: string[]
+  categories: string[]
+  collection_title: string | null
+  type: string | null
+  tags: string[]
+  status: string
+  created_at: string
+  updated_at: string
   variants: {
     id: string
     title: string
+    sku: string | null
     inventory_quantity: number
+    allow_backorder: boolean
+    manage_inventory: boolean
     prices: {
       amount: number
       currency_code: string
+      region_id?: string
     }[]
   }[]
 }
 
-export type CategoryHit = Hit<BaseHit> & {
+export interface CategoryHit extends Hit<{
   id: string
   name: string
   handle: string
-  parent_category: {
+  description?: string
+  thumbnail?: string
+  parent_category_id?: string
+  parent_category?: {
     id: string
     name: string
     handle: string
   } | null
-  thumbnail: string | null
-}
+  hierarchy_path: string[]      // ["Fachbodenregale", "Steckregale", "Einzelregal"]
+  hierarchy_handles: string[]   // ["fachbodenregale", "steckregale", "einzelregal"]
+  hierarchy_breadcrumb: string  // "Fachbodenregale → Steckregale → Einzelregal"
+  level: number                 // 0 = root, 1 = child, 2 = grandchild, etc.
+}> {}
 
 export type SearchResults = {
   products: {

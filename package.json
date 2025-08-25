@@ -12,7 +12,8 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "analyze": "ANALYZE=true next build"
+    "analyze": "ANALYZE=true next build",
+    "configure-search": "node scripts/configure-meilisearch.js"
   },
   "dependencies": {
     "@headlessui/react": "^2.2.0",
@@ -26,6 +27,7 @@
     "@types/react-scroll": "^1.8.10",
     "@use-gesture/react": "^10.3.1",
     "daisyui": "^5.0.50",
+    "embla-carousel-react": "^8.6.0",
     "framer-motion": "^12.23.12",
     "keen-slider": "^6.8.6",
     "lodash": "^4.17.21",
@@ -39,6 +41,7 @@
     "react-instantsearch": "^7.15.3",
     "react-instantsearch-nextjs": "^1.0.1",
     "server-only": "^0.0.1",
+    "swiper": "^11.2.10",
     "tailwindcss-radix": "^2.8.0",
     "vanilla-cookieconsent": "^3.1.0",
     "webpack": "^5"

@@ -9,7 +9,9 @@ import OptionSelect from "@modules/products/components/product-actions/option-se
 import { isEqual } from "lodash"
 import { useParams } from "next/navigation"
 import { useEffect, useMemo, useRef, useState } from "react"
+import { AnimatePresence, motion } from "framer-motion"
 import ProductPrice from "../product-price"
+import { useProductVariant } from "@lib/context/product-variant-context"
 import MobileActions from "./mobile-actions"
 
 type ProductActionsProps = {
@@ -33,7 +35,12 @@ export default function ProductActions({
 }: ProductActionsProps) {
   const [options, setOptions] = useState<Record<string, string | undefined>>({})
   const [isAdding, setIsAdding] = useState(false)
+  const [quantity, setQuantity] = useState<number>(1)
+  const [inputValue, setInputValue] = useState<string | null>(null)
+  const [lastDelta, setLastDelta] = useState<1 | -1>(1)
+  const isEditing = inputValue !== null
   const countryCode = useParams().countryCode as string
+  const { setSelectedVariant } = useProductVariant()
 
   // If there is only 1 variant, preselect the options
   useEffect(() => {
@@ -53,6 +60,11 @@ export default function ProductActions({
       return isEqual(variantOptions, options)
     })
   }, [product.variants, options])
+
+  // expose selected variant via context
+  useEffect(() => {
+    setSelectedVariant(selectedVariant)
+  }, [selectedVariant, setSelectedVariant])
 
   // update the options when a variant is selected
   const setOptionValue = (optionId: string, value: string) => {
@@ -94,6 +106,25 @@ export default function ProductActions({
     return false
   }, [selectedVariant])
 
+  // compute max quantity if inventory is managed and backorder is not allowed
+  const maxQuantity = useMemo(() => {
+    if (!selectedVariant) return undefined as number | undefined
+    if (!selectedVariant.manage_inventory) return undefined
+    if (selectedVariant.allow_backorder) return undefined
+    return Math.max(0, selectedVariant.inventory_quantity || 0)
+  }, [selectedVariant])
+
+  // clamp quantity when variant changes or maxQuantity decreases
+  useEffect(() => {
+    setQuantity((q) => {
+      const min = 1
+      const max = maxQuantity ?? Number.MAX_SAFE_INTEGER
+      if (q < min) return min
+      if (q > max) return max
+      return q
+    })
+  }, [maxQuantity])
+
   const actionsRef = useRef<HTMLDivElement>(null)
 
   const inView = useIntersection(actionsRef, "0px")
@@ -106,7 +137,7 @@ export default function ProductActions({
 
     await addToCart({
       variantId: selectedVariant.id,
-      quantity: 1,
+      quantity: quantity || 1,
       countryCode,
     })
 
@@ -139,6 +170,176 @@ export default function ProductActions({
         </div>
 
         <ProductPrice product={product} variant={selectedVariant} />
+
+        {/* Quantity selector - visible only when in stock and a valid variant is selected */}
+        {inStock && selectedVariant && isValidVariant && (
+          <motion.div
+            className="w-full"
+            initial={{ opacity: 0, y: -4 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ type: "spring", stiffness: 320, damping: 26 }}
+          >
+            <div className="flex items-stretch w-full border border-ui-border-base rounded-rounded overflow-hidden bg-ui-bg-subtle">
+              {(() => {
+                const decDisabled = !!disabled || isAdding || quantity <= 1
+                return (
+                  <motion.button
+                    type="button"
+                    whileTap={{ scale: 0.95 }}
+                    onClick={() => {
+                      setLastDelta(-1)
+                      setQuantity((q) => Math.max(1, q - 1))
+                    }}
+                    className={`px-3 min-w-[2.5rem] h-10 flex items-center justify-center text-small-regular select-none border-r border-ui-border-base transition-colors ${
+                      decDisabled
+                        ? "text-ui-fg-muted cursor-not-allowed opacity-50"
+                        : "text-ui-fg-base hover:bg-ui-bg-base cursor-pointer"
+                    }`}
+                    aria-label="Decrease quantity"
+                    title="Decrease quantity"
+                    disabled={decDisabled}
+                  >
+                    −
+                  </motion.button>
+                )
+              })()}
+
+              <div
+                className={`relative flex-1 h-10 flex items-center justify-center transition-colors focus-within:ring-1 focus-within:ring-ui-border-strong ${
+                  isEditing ? "bg-ui-bg-base" : ""
+                }`}
+              >
+                {!isEditing && (
+                  <AnimatePresence mode="popLayout" initial={false}>
+                    <motion.span
+                      key={quantity}
+                      initial={{ y: lastDelta > 0 ? 8 : -8, opacity: 0 }}
+                      animate={{ y: 0, opacity: 1 }}
+                      exit={{ y: lastDelta > 0 ? -8 : 8, opacity: 0 }}
+                      transition={{ duration: 0.18 }}
+                      className="text-base font-medium text-ui-fg-base tabular-nums"
+                      aria-live="polite"
+                    >
+                      {quantity}
+                    </motion.span>
+                  </AnimatePresence>
+                )}
+                {/* Transparent input overlay for manual entry */}
+                <input
+                  type="number"
+                  inputMode="numeric"
+                  pattern="[0-9]*"
+                  className={`absolute inset-0 w-full h-full bg-transparent text-center text-base font-medium text-ui-fg-base tabular-nums outline-none ${
+                    isEditing ? "opacity-100" : "opacity-0"
+                  }`}
+                  min={1}
+                  max={maxQuantity}
+                  value={inputValue !== null ? inputValue : String(quantity)}
+                  placeholder="0"
+                  onChange={(e) => {
+                    const val = e.target.value
+                    // Allow empty string so user can replace the value
+                    if (val === "") {
+                      setInputValue("")
+                      return
+                    }
+                    // Only allow digits
+                    if (!/^\d+$/.test(val)) {
+                      return
+                    }
+                    setInputValue(val)
+                  }}
+                  onWheel={(e) => {
+                    // prevent accidental wheel changes
+                    e.currentTarget.blur()
+                  }}
+                  onFocus={(e) => {
+                    // Enter editing mode and select text for quick overwrite
+                    if (inputValue === null) {
+                      setInputValue(String(quantity))
+                    }
+                    // Using setTimeout to ensure selection after focus paints
+                    setTimeout(() => {
+                      try {
+                        e.currentTarget.select()
+                      } catch {}
+                    }, 0)
+                  }}
+                  onKeyDown={(e) => {
+                    if (e.key === "ArrowUp") {
+                      e.preventDefault()
+                      setLastDelta(1)
+                      setQuantity((q) => {
+                        const max = maxQuantity ?? Number.MAX_SAFE_INTEGER
+                        return Math.min(q + 1, max)
+                      })
+                      setInputValue(null)
+                    } else if (e.key === "ArrowDown") {
+                      e.preventDefault()
+                      setLastDelta(-1)
+                      setQuantity((q) => Math.max(1, q - 1))
+                      setInputValue(null)
+                    } else if (e.key === "Enter") {
+                      e.preventDefault()
+                      const parsed = parseInt((inputValue ?? String(quantity)).trim(), 10)
+                      const min = 1
+                      const max = maxQuantity ?? Number.MAX_SAFE_INTEGER
+                      const clamped = Number.isNaN(parsed)
+                        ? min
+                        : Math.min(Math.max(parsed, min), max)
+                      setLastDelta(clamped > quantity ? 1 : -1)
+                      setQuantity(clamped)
+                      setInputValue(null)
+                    }
+                  }}
+                  onBlur={() => {
+                    const parsed = parseInt((inputValue ?? String(quantity)).trim(), 10)
+                    const min = 1
+                    const max = maxQuantity ?? Number.MAX_SAFE_INTEGER
+                    const clamped = Number.isNaN(parsed)
+                      ? min
+                      : Math.min(Math.max(parsed, min), max)
+                    setLastDelta(clamped > quantity ? 1 : -1)
+                    setQuantity(clamped)
+                    setInputValue(null)
+                  }}
+                  aria-label="Quantity"
+                  title="Quantity"
+                />
+              </div>
+
+              {(() => {
+                const incDisabled =
+                  !!disabled ||
+                  isAdding ||
+                  (maxQuantity !== undefined && quantity >= maxQuantity)
+                return (
+                  <motion.button
+                    type="button"
+                    whileTap={{ scale: 0.95 }}
+                    onClick={() => {
+                      setLastDelta(1)
+                      setQuantity((q) => {
+                        const max = maxQuantity ?? Number.MAX_SAFE_INTEGER
+                        return Math.min(q + 1, max)
+                      })
+                    }}
+                    className={`px-3 min-w-[2.5rem] h-10 flex items-center justify-center text-small-regular select-none border-l border-ui-border-base transition-colors ${
+                      incDisabled
+                        ? "text-ui-fg-muted cursor-not-allowed opacity-50"
+                        : "text-ui-fg-base hover:bg-ui-bg-base cursor-pointer"
+                    }`}
+                    aria-label="Increase quantity"
+                    title="Increase quantity"
+                    disabled={incDisabled}
+                  >
+                    +
+                  </motion.button>
+                )
+              })()}
+            </div>
+          </motion.div>
+        )}
 
         <Button
           onClick={handleAddToCart}

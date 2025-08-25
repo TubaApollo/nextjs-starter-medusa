@@ -1,7 +1,7 @@
 "use client"
 
 import { convertToLocale } from "@lib/util/money"
-import React from "react"
+import React, { useMemo } from "react"
 
 type CartTotalsProps = {
   totals: {
@@ -27,68 +27,93 @@ const CartTotals: React.FC<CartTotalsProps> = ({ totals }) => {
     shipping_subtotal,
   } = totals
 
+  // Derive a net items subtotal (excluding shipping and taxes)
+  // Fallback formula if backend subtotal includes shipping/tax: itemsNet = total - shipping - taxes
+  const itemsNet = useMemo(() => {
+    const t = typeof total === "number" ? total : 0
+    const ship = typeof shipping_subtotal === "number" ? shipping_subtotal : 0
+    const tax = typeof tax_total === "number" ? tax_total : 0
+    // Prefer provided subtotal if it is <= (total - ship) (assume it doesn't include shipping)
+    const provided = typeof subtotal === "number" ? subtotal : undefined
+    const derived = Math.max(0, t - ship - tax)
+    // If provided subtotal seems to include shipping (greater than derived), use derived
+    if (typeof provided === "number") {
+      return provided > derived ? derived : provided
+    }
+    return derived
+  }, [total, shipping_subtotal, tax_total, subtotal])
+
+  const discount = typeof discount_total === "number" ? discount_total : 0
+  const gift = typeof gift_card_total === "number" ? gift_card_total : 0
+  const shipping = typeof shipping_subtotal === "number" ? shipping_subtotal : 0
+  const taxes = typeof tax_total === "number" ? tax_total : 0
+
+  // Net total before tax (items net - discounts - gift + shipping)
+  const netTotal = useMemo(() => {
+    return Math.max(0, itemsNet - discount - gift + shipping)
+  }, [itemsNet, discount, gift, shipping])
+
   return (
     <div>
       <div className="flex flex-col gap-y-2 txt-medium text-ui-fg-subtle ">
         <div className="flex items-center justify-between">
-          <span className="flex gap-x-1 items-center">
-            Subtotal (excl. shipping and taxes)
-          </span>
-          <span data-testid="cart-subtotal" data-value={subtotal || 0}>
-            {convertToLocale({ amount: subtotal ?? 0, currency_code })}
+          <span className="flex gap-x-1 items-center">Zwischensumme netto</span>
+          <span data-testid="cart-subtotal" data-value={itemsNet}>
+            {convertToLocale({ amount: itemsNet, currency_code })}
           </span>
         </div>
-        {!!discount_total && (
+        {!!discount && (
           <div className="flex items-center justify-between">
-            <span>Discount</span>
+            <span>Rabatt</span>
             <span
               className="text-ui-fg-interactive"
               data-testid="cart-discount"
-              data-value={discount_total || 0}
+              data-value={discount}
             >
-              -{" "}
-              {convertToLocale({ amount: discount_total ?? 0, currency_code })}
+              - {convertToLocale({ amount: discount, currency_code })}
+            </span>
+          </div>
+        )}
+        {!!gift && (
+          <div className="flex items-center justify-between">
+            <span>Gutschein</span>
+            <span
+              className="text-ui-fg-interactive"
+              data-testid="cart-gift-card-amount"
+              data-value={gift}
+            >
+              - {convertToLocale({ amount: gift, currency_code })}
             </span>
           </div>
         )}
         <div className="flex items-center justify-between">
-          <span>Shipping</span>
-          <span data-testid="cart-shipping" data-value={shipping_subtotal || 0}>
-            {convertToLocale({ amount: shipping_subtotal ?? 0, currency_code })}
+          <span>Versandkosten</span>
+          <span data-testid="cart-shipping" data-value={shipping}>
+            {convertToLocale({ amount: shipping, currency_code })}
           </span>
         </div>
-        <div className="flex justify-between">
-          <span className="flex gap-x-1 items-center ">Taxes</span>
-          <span data-testid="cart-taxes" data-value={tax_total || 0}>
-            {convertToLocale({ amount: tax_total ?? 0, currency_code })}
-          </span>
-        </div>
-        {!!gift_card_total && (
-          <div className="flex items-center justify-between">
-            <span>Gift card</span>
-            <span
-              className="text-ui-fg-interactive"
-              data-testid="cart-gift-card-amount"
-              data-value={gift_card_total || 0}
-            >
-              -{" "}
-              {convertToLocale({ amount: gift_card_total ?? 0, currency_code })}
-            </span>
-          </div>
-        )}
       </div>
       <div className="h-px w-full border-b border-gray-200 my-4" />
-      <div className="flex items-center justify-between text-ui-fg-base mb-2 txt-medium ">
-        <span>Total</span>
-        <span
-          className="txt-xlarge-plus"
-          data-testid="cart-total"
-          data-value={total || 0}
-        >
+      <div className="flex items-center justify-between text-ui-fg-base mb-1 txt-medium ">
+        <span>Gesamtsumme netto</span>
+        <span className="txt-large" data-testid="cart-total-net" data-value={netTotal}>
+          {convertToLocale({ amount: netTotal, currency_code })}
+        </span>
+      </div>
+      <div className="flex items-center justify-between text-ui-fg-subtle mb-2 txt-medium ">
+        <span>zzgl. MwSt.</span>
+        <span data-testid="cart-taxes" data-value={taxes}>
+          {convertToLocale({ amount: taxes, currency_code })}
+        </span>
+      </div>
+      <div className="h-px w-full border-b border-gray-200 my-4" />
+      <div className="flex items-center justify-between text-ui-fg-base mb-2 font-semibold ">
+        <span>Gesamtsumme brutto</span>
+        <span className="txt-xlarge-plus" data-testid="cart-total" data-value={total || 0}>
           {convertToLocale({ amount: total ?? 0, currency_code })}
         </span>
       </div>
-      <div className="h-px w-full border-b border-gray-200 mt-4" />
+      <div className="h-px w-full border-b border-gray-200 mt-2" />
     </div>
   )
 }

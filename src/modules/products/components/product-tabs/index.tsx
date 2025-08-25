@@ -5,6 +5,7 @@ import FastDelivery from "@modules/common/icons/fast-delivery"
 import Refresh from "@modules/common/icons/refresh"
 
 import Accordion from "./accordion"
+import { useProductVariant } from "@lib/context/product-variant-context"
 import { HttpTypes } from "@medusajs/types"
 
 type ProductTabsProps = {
@@ -42,10 +43,17 @@ const ProductTabs = ({ product }: ProductTabsProps) => {
 }
 
 const ProductInfoTab = ({ product }: ProductTabsProps) => {
+  const { selectedVariant } = useProductVariant()
+  const fallbackVariant = product.variants && product.variants.length === 1 ? product.variants[0] : undefined
+  const sku = selectedVariant?.sku || fallbackVariant?.sku || "-"
   return (
     <div className="text-small-regular py-8">
       <div className="grid grid-cols-2 gap-x-8">
         <div className="flex flex-col gap-y-4">
+          <div>
+            <span className="font-semibold">SKU</span>
+            <p>{sku}</p>
+          </div>
           <div>
             <span className="font-semibold">Material</span>
             <p>{product.material ? product.material : "-"}</p>

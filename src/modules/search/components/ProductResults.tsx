@@ -13,16 +13,24 @@ import ProductHitComponent from "./ProductHit"
 const ProductResults = () => {
   const { hits } = useHits()
   const pathname = usePathname()
-  
+  const { query } = useSearchBox()
+
   const hitsArray = Array.isArray(hits) ? hits : []
-  const displayLimit = 10
+  const displayLimit = query.trim() ? 10 : 20 // Show more results for empty queries
   const hasMoreResults = hitsArray.length > displayLimit
   const displayedHits = hitsArray.slice(0, displayLimit)
 
-    const { query } = useSearchBox()
   const effectiveQuery = query.trim()
 
   // No parent state updates here to avoid render loops; parent uses ResultsTracker
+
+  if (hitsArray.length === 0 && !effectiveQuery) {
+    return (
+      <div className="text-center py-8 text-gray-500 dark:text-gray-400">
+        <p>No products available.</p>
+      </div>
+    )
+  }
 
   if (hitsArray.length === 0) {
     return null
@@ -70,7 +78,7 @@ const ProductResults = () => {
         <div className="mt-4 pt-4 border-t border-gray-200">
           <Link
             href={`/${(pathname?.split('/')[1] || 'us')}/search?query=${encodeURIComponent(effectiveQuery)}`}
-            className="inline-flex items-center text-sm text-blue-600 hover:text-blue-800 font-medium"
+            className="inline-flex items-center text-sm text-green-600 hover:text-green-800 font-medium"
           >
             Show all {hitsArray.length} products →
           </Link>

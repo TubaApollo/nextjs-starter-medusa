@@ -68,6 +68,13 @@ const CartDropdown = ({ cart: cartState }: CartDropdownProps) => {
     previousTotalItems.current = totalItems
   }, [totalItems, pathname])
 
+  // Open on global event (from AddToCartButton)
+  useEffect(() => {
+    const handler = () => openWithTimeout()
+    window.addEventListener("open-cart-dropdown", handler)
+    return () => window.removeEventListener("open-cart-dropdown", handler)
+  }, [])
+
   return (
     <div className="h-full" onMouseEnter={openAndClearTimeout} onMouseLeave={closeDropdown}>
       <Popover className="relative h-full">

@@ -3,14 +3,15 @@
 import { HttpTypes } from "@medusajs/types"
 import { sdk } from "@lib/config"
 import { getProductPrice } from "@lib/util/get-product-price"
-import { getOrSetCart } from "@lib/data/cart"
+import { getRegion } from "@lib/data/regions"
 
 export async function getCheapestProductPrice(productId: string, countryCode: string) {
   try {
-    const cart = await getOrSetCart(countryCode)
+    const region = await getRegion(countryCode)
+    if (!region) return null
     const { products } = await sdk.store.product.list({
       id: [productId],
-      region_id: cart?.region_id,
+      region_id: region.id,
       fields: "*variants.calculated_price",
     })
 

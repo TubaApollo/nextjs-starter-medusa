@@ -61,8 +61,12 @@ const ImageOrPlaceholder = ({
       fill
     />
   ) : (
-    <div className="w-full h-full absolute inset-0 flex items-center justify-center">
-      <PlaceholderImage size={size === "small" ? 16 : 24} />
+    <div className="w-full h-full absolute inset-0 flex items-center justify-center bg-ui-bg-subtle">
+      {(() => {
+        // Make the placeholder icon scale better with the card size
+        const iconPx = size === "small" ? 28 : size === "medium" ? 36 : size === "square" ? 40 : 48
+        return <PlaceholderImage size={String(iconPx)} color="#9CA3AF" />
+      })()}
     </div>
   )
 }

@@ -1,19 +1,9 @@
-import { Metadata } from "next"
-
-import SearchResultsTemplate from "@modules/search/templates/search-results-template"
-
-import { search } from "@modules/search/actions"
-import { SortOptions } from "@modules/store/components/refinement-list/sort-products"
-
-export const metadata: Metadata = {
-  title: "Search",
-  description: "Explore all of our products.",
-}
+import { redirect } from "next/navigation"
 
 type Params = {
   params: Promise<{ query: string; countryCode: string }>
   searchParams: Promise<{
-    sortBy?: SortOptions
+    sortBy?: string
     page?: string
   }>
 }
@@ -21,24 +11,14 @@ type Params = {
 export default async function SearchResults(props: Params) {
   const searchParams = await props.searchParams;
   const params = await props.params;
-  const { query } = params
+  const { query, countryCode } = params
   const { sortBy, page } = searchParams
 
-  const hits = await search(query).then((data) => data)
+  // Redirect to the main search page with query parameters
+  const searchUrl = new URL(`/${countryCode}/search`, 'http://localhost:3000')
+  searchUrl.searchParams.set('query', query)
+  if (sortBy) searchUrl.searchParams.set('sortBy', sortBy)
+  if (page) searchUrl.searchParams.set('page', page)
 
-  const ids = hits
-    .map((h) => h.objectID || h.id)
-    .filter((id): id is string => {
-      return typeof id === "string"
-    })
-
-  return (
-    <SearchResultsTemplate
-      query={query}
-      ids={ids}
-      sortBy={sortBy}
-      page={page}
-      countryCode={params.countryCode}
-    />
-  )
+  redirect(searchUrl.pathname + searchUrl.search)
 }

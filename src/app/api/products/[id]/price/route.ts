@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server"
 import { sdk } from "@lib/config"
 import { getProductPrice } from "@lib/util/get-product-price"
-import { getOrSetCart } from "@lib/data/cart"
+import { getRegion } from "@lib/data/regions"
 
 export async function GET(
   request: NextRequest,
@@ -18,10 +18,13 @@ export async function GET(
   }
 
   try {
-    const cart = await getOrSetCart(countryCode)
+    const region = await getRegion(countryCode)
+    if (!region) {
+      return NextResponse.json({ message: "Region not found" }, { status: 404 })
+    }
     const { products } = await sdk.store.product.list({
       id: [productId],
-      region_id: cart?.region_id,
+      region_id: region.id,
       fields: "*variants.calculated_price",
     })
 

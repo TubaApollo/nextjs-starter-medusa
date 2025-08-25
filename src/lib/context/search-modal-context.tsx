@@ -5,15 +5,18 @@ import React, { createContext, useContext, useState, ReactNode } from 'react';
 interface SearchModalContextType {
   searchOpen: boolean;
   setSearchOpen: (open: boolean) => void;
+  searchQuery: string;
+  setSearchQuery: (query: string) => void;
 }
 
 const SearchModalContext = createContext<SearchModalContextType | undefined>(undefined);
 
 export const SearchModalProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   const [searchOpen, setSearchOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
 
   return (
-    <SearchModalContext.Provider value={{ searchOpen, setSearchOpen }}>
+    <SearchModalContext.Provider value={{ searchOpen, setSearchOpen, searchQuery, setSearchQuery }}>
       {children}
     </SearchModalContext.Provider>
   );

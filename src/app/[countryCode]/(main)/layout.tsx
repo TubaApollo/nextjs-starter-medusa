@@ -1,6 +1,6 @@
 import { Metadata } from "next"
 
-import { getOrSetCart, listCartOptions, retrieveCart } from "@lib/data/cart"
+import { listCartOptions, retrieveCart } from "@lib/data/cart"
 import { retrieveCustomer } from "@lib/data/customer"
 import { getBaseURL } from "@lib/util/env"
 import { StoreCartShippingOption } from "@medusajs/types"
@@ -9,16 +9,16 @@ import Footer from "@modules/layout/templates/footer"
 import Nav from "@modules/layout/templates/nav"
 import FreeShippingPriceNudge from "@modules/shipping/components/free-shipping-price-nudge"
 import { ModalProvider } from "@lib/context/modal-context"
-import MobileSearchPopup from "@modules/search/components/MobileSearchPopup"
 
 export const metadata: Metadata = {
   metadataBase: new URL(getBaseURL()),
 }
 
-export default async function PageLayout(props: { children: React.ReactNode; params: { countryCode: string } }) {
+export default async function PageLayout(props: { children: React.ReactNode; params: Promise<{ countryCode: string }> }) {
+  const { countryCode } = await props.params
   const customer = await retrieveCustomer()
-  // Ensure cart is aligned to the URL country at boot so taxes are correct from the start
-  const cart = await getOrSetCart(props.params.countryCode)
+  // Only retrieve existing cart - don't create one here to avoid cookie modification in layout
+  const cart = await retrieveCart()
   let shippingOptions: StoreCartShippingOption[] = []
 
   if (cart) {
@@ -42,7 +42,6 @@ export default async function PageLayout(props: { children: React.ReactNode; par
         />
       )}
       {props.children}
-      <MobileSearchPopup />
       <Footer />
     </>
   )

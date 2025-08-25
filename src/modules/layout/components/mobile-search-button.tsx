@@ -2,24 +2,24 @@
 
 import { MagnifyingGlassIcon } from "@heroicons/react/24/outline"
 
-export default function MobileSearchButton() {
-  const handleSearchClick = () => {
-    // Dispatch global event listened by SearchWrapper to open overlay
-    if (typeof window !== 'undefined') {
-      window.dispatchEvent(new Event('open-search-overlay'))
-    }
+const MobileSearchButton = () => {
+  const handleClick = () => {
+    console.log('Mobile search button clicked')
+    // Trigger the search overlay via custom event
+    window.dispatchEvent(new CustomEvent('open-search'))
   }
 
   return (
-    <>
-      <div className="xl:hidden flex items-center">
-        <button
-          className="text-ui-fg-base hover:text-ui-fg-subtle"
-          onClick={handleSearchClick}
-        >
-          <MagnifyingGlassIcon className="w-5 h-5" aria-hidden="true" />
-        </button>
-      </div>
-    </>
+    <div className="md:hidden flex items-center">
+      <button
+        onClick={handleClick}
+        className="flex items-center justify-center p-2 text-gray-700 hover:text-gray-900"
+        aria-label="Open search"
+      >
+        <MagnifyingGlassIcon className="w-6 h-6" />
+      </button>
+    </div>
   )
 }
+
+export default MobileSearchButton

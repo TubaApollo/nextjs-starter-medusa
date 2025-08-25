@@ -1,0 +1,66 @@
+/* Search page animations */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fadeIn {
+  animation: fadeIn 0.3s ease-in-out forwards;
+}
+
+/* Staggered animations for search results */
+.staggered-item {
+  opacity: 0;
+  transform: translateY(8px);
+}
+
+.staggered-item-0 { animation: fadeIn 0.3s ease-in-out forwards; }
+.staggered-item-1 { animation: fadeIn 0.3s ease-in-out 0.05s forwards; }
+.staggered-item-2 { animation: fadeIn 0.3s ease-in-out 0.1s forwards; }
+.staggered-item-3 { animation: fadeIn 0.3s ease-in-out 0.15s forwards; }
+.staggered-item-4 { animation: fadeIn 0.3s ease-in-out 0.2s forwards; }
+.staggered-item-5 { animation: fadeIn 0.3s ease-in-out 0.25s forwards; }
+.staggered-item-6 { animation: fadeIn 0.3s ease-in-out 0.3s forwards; }
+.staggered-item-7 { animation: fadeIn 0.3s ease-in-out 0.35s forwards; }
+.staggered-item-8 { animation: fadeIn 0.3s ease-in-out 0.4s forwards; }
+.staggered-item-9 { animation: fadeIn 0.3s ease-in-out 0.45s forwards; }
+.staggered-item-10 { animation: fadeIn 0.3s ease-in-out 0.5s forwards; }
+.staggered-item-11 { animation: fadeIn 0.3s ease-in-out 0.55s forwards; }
+
+/* Search filter transitions */
+.filter-transition {
+  transition: all 0.3s ease-in-out;
+}
+
+/* Highlight text styling */
+.ais-Highlight-highlighted {
+  background-color: rgba(255, 235, 150, 0.4);
+  padding: 0 2px;
+  border-radius: 2px;
+  font-weight: bold;
+}
+
+/* Slider styling */
+.ais-RangeInput-input {
+  width: 80px !important;
+}
+
+/* Responsive adjustments */
+@media (max-width: 640px) {
+  .ais-RangeInput-form {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  .ais-RangeInput-separator {
+    margin: 8px 0;
+  }
+  .ais-RangeInput-submit {
+    margin-top: 8px;
+  }
+}

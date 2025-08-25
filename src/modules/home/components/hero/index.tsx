@@ -6,17 +6,8 @@ import Link from "next/link"
 import Image from "next/image"
 import { motion, AnimatePresence, PanInfo } from "framer-motion"
 import { fetchProductsByCategory } from "app/actions/product" // Import the server action
-
-// Add FontAwesome CSS
-const fontAwesomeLink = typeof document !== 'undefined' ? (() => {
-  const link = document.createElement('link');
-  link.rel = 'stylesheet';
-  link.href = 'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css';
-  if (!document.head.querySelector('link[href*="font-awesome"]')) {
-    document.head.appendChild(link);
-  }
-  return link;
-})() : null;
+import { ArrowRightIcon, ChevronRightIcon, PhoneIcon, EnvelopeIcon } from "@heroicons/react/24/outline"
+import HeroSwiper from "./HeroSwiper"
 
 interface HeroProps {
   categories: HttpTypes.StoreProductCategory[]
@@ -48,153 +39,7 @@ const slides = [
 const SLIDE_INTERVAL = 8000
 const PRODUCT_FETCH_DELAY = 200
 
-const HeroSlider = () => {
-  const [currentSlide, setCurrentSlide] = useState(0)
 
-  const nextSlide = useCallback(() => {
-    setCurrentSlide((prev) => (prev + 1) % slides.length)
-  }, [])
-
-  const prevSlide = useCallback(() => {
-    setCurrentSlide((prev) => (prev - 1 + slides.length) % slides.length)
-  }, [])
-
-  useEffect(() => {
-    const slideInterval = setInterval(nextSlide, SLIDE_INTERVAL)
-    return () => clearInterval(slideInterval)
-  }, [nextSlide])
-
-  const handleDragEnd = useCallback(
-    (_: unknown, { offset, velocity }: PanInfo) => {
-      const swipeConfidenceThreshold = 10000
-      const swipe = Math.abs(offset.x) * velocity.x
-
-      if (swipe < -swipeConfidenceThreshold) {
-        nextSlide()
-      } else if (swipe > swipeConfidenceThreshold) {
-        prevSlide()
-      }
-    },
-    [nextSlide, prevSlide]
-  )
-
-  const slideVariants = {
-    enter: { x: "100%", opacity: 0 },
-    center: { x: 0, opacity: 1 },
-    exit: { x: "-100%", opacity: 0 },
-  }
-
-  return (
-    <div className="relative w-full h-[300px] md:h-[450px] lg:h-full overflow-hidden rounded-lg">
-      <AnimatePresence initial={false}>
-        <motion.div
-          key={currentSlide}
-          variants={slideVariants}
-          initial="enter"
-          animate="center"
-          exit="exit"
-          transition={{
-            type: "tween",
-            ease: "easeInOut",
-            duration: 0.5,
-          }}
-          className="absolute w-full h-full"
-          drag="x"
-          dragConstraints={{ left: 0, right: 0 }}
-          dragElastic={0.1}
-          onDragEnd={handleDragEnd}
-        >
-          <Image
-            src={slides[currentSlide].image}
-            alt={slides[currentSlide].title}
-            fill
-            style={{ objectFit: "cover", transform: "scale(1.02)" }}
-            priority
-            sizes="(max-width: 1024px) 100vw, 75vw"
-          />
-          {/* Modern gradient overlay with vibrant red accents */}
-          <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-red-800/10 to-transparent"></div>
-          <div className="absolute inset-0 bg-gradient-to-br from-red-600/0 to-red-700/15"></div>
-          
-          {/* Text aligned to bottom-left instead of center */}
-          <div className="absolute inset-0 flex flex-col justify-end items-start p-6 md:p-12 pointer-events-none">
-            <div className="max-w-2xl">
-              <motion.h2 
-                className="text-2xl md:text-4xl lg:text-5xl font-bold text-white mb-4 leading-tight"
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.6, delay: 0.2 }}
-              >
-                {slides[currentSlide].title}
-              </motion.h2>
-              <motion.p 
-                className="text-lg md:text-xl lg:text-2xl text-gray-200 mb-8"
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.6, delay: 0.4 }}
-              >
-                {slides[currentSlide].subtitle}
-              </motion.p>
-              
-              {/* Ultra-Modern CTA Button */}
-              <motion.div
-                className="pointer-events-auto"
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.6, delay: 0.6 }}
-              >
-                <button className="group/hero-cta relative overflow-hidden bg-white/10 backdrop-blur-md border border-white/20 hover:border-red-500/50 text-white font-medium py-4 px-8 rounded-2xl transition-all duration-500 hover:bg-red-600/90 hover:backdrop-blur-sm transform hover:scale-105 hover:shadow-2xl hover:shadow-red-500/25">
-                  <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent -translate-x-full group-hover/hero-cta:translate-x-full transition-transform duration-1000"></div>
-                  <span className="relative z-10 flex items-center space-x-3">
-                    <span className="text-lg">Jetzt entdecken</span>
-                    <div className="relative w-8 h-8 flex items-center justify-center">
-                      <div className="absolute inset-0 bg-red-500 rounded-full scale-0 group-hover/hero-cta:scale-100 transition-transform duration-300"></div>
-                      <svg className="relative h-5 w-5 transition-all duration-300 group-hover/hero-cta:translate-x-1 group-hover/hero-cta:text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                        <line x1="5" y1="12" x2="19" y2="12"></line>
-                        <polyline points="12 5 19 12 12 19"></polyline>
-                      </svg>
-                    </div>
-                  </span>
-                </button>
-              </motion.div>
-            </div>
-          </div>
-        </motion.div>
-      </AnimatePresence>
-
-      {/* Ultra-Modern Navigation Indicators */}
-      <div className="absolute bottom-6 right-6 z-10">
-        <div className="flex items-center space-x-1 p-2 bg-black/20 backdrop-blur-xl rounded-2xl border border-white/10">
-          {slides.map((_, index) => (
-            <button
-              key={index}
-              onClick={() => setCurrentSlide(index)}
-              className="relative h-2 rounded-full focus:outline-none transition-all duration-500 group overflow-hidden"
-              style={{ width: currentSlide === index ? '32px' : '8px' }}
-              aria-label={`Go to slide ${index + 1}`}
-            >
-              <div className="h-full w-full rounded-full bg-white/30 group-hover:bg-white/50 transition-colors duration-300" />
-              {currentSlide === index && (
-                <motion.div
-                  layoutId="active-slide-indicator"
-                  className="absolute inset-0 h-full w-full rounded-full bg-gradient-to-r from-red-500 to-red-400 shadow-lg"
-                  transition={{ type: "spring", stiffness: 400, damping: 30 }}
-                />
-              )}
-              {currentSlide === index && (
-                <motion.div
-                  className="absolute inset-0 h-full w-full rounded-full bg-white/20"
-                  animate={{ x: ['-100%', '100%'] }}
-                  transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
-                />
-              )}
-            </button>
-          ))}
-        </div>
-      </div>
-    </div>
-  )
-}
 
 const Hero: React.FC<HeroProps> = ({
   categories: initialCategories,
@@ -299,21 +144,7 @@ const Hero: React.FC<HeroProps> = ({
                 >
                   {child.name}
                   {fullChild?.category_children && fullChild.category_children.length > 0 && (
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      className="h-5 w-5"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                      stroke="currentColor"
-                      aria-hidden="true"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M9 5l7 7-7 7"
-                      />
-                    </svg>
+                    <ChevronRightIcon className="h-5 w-5" aria-hidden="true" />
                   )}
                 </Link>
               </li>
@@ -351,41 +182,30 @@ const Hero: React.FC<HeroProps> = ({
                     aria-label={`View ${category.name} category`}
                   >
                     <span>{category.name}</span>
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
+                    <ChevronRightIcon
                       className={`h-4 w-4 transition-all duration-200 ${hoveredCategoryPath[0] === category.id ? 'text-red-500 translate-x-1' : 'group-hover:translate-x-1'}`}
-                      fill="none"
-                      viewBox="0 0 24 24"
-                      stroke="currentColor"
                       aria-hidden="true"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M9 5l7 7-7 7"
-                      />
-                    </svg>
+                    />
                   </Link>
                 </motion.li>
               ))}
             </ul>
           </nav>
 
-          {/* Contact Information with FontAwesome Icons */}
+          {/* Contact Information with Heroicons */}
           <div className="mt-8 pt-6 border-t border-slate-700">
             <div className="space-y-4">
               <div className="group">
                 <h3 className="text-xs font-semibold text-red-500 uppercase tracking-wider mb-2">Service-Hotline</h3>
                 <div className="flex items-center space-x-3">
-                  <i className="fas fa-phone text-red-500 text-sm"></i>
+                  <PhoneIcon className="h-4 w-4 text-red-500" />
                   <p className="text-gray-300 hover:text-red-500 transition-colors cursor-pointer text-sm">[Your Phone Number]</p>
                 </div>
               </div>
               <div className="group">
                 <h3 className="text-xs font-semibold text-red-500 uppercase tracking-wider mb-2">Service-E-Mail</h3>
                 <div className="flex items-center space-x-3">
-                  <i className="fas fa-envelope text-red-500 text-sm"></i>
+                  <EnvelopeIcon className="h-4 w-4 text-red-500" />
                   <p className="text-gray-300 hover:text-red-500 transition-colors cursor-pointer text-sm">[Your Email Address]</p>
                 </div>
               </div>
@@ -396,7 +216,7 @@ const Hero: React.FC<HeroProps> = ({
 
       {/* Right Side - Hero Slider (Full width on mobile) */}
       <div className="w-full lg:w-3/4 order-1 lg:order-2 relative p-4 lg:p-6">
-        <HeroSlider />
+        <HeroSwiper />
         
         {/* Category Overlay Menu - Desktop Only */}
         <AnimatePresence>
@@ -460,14 +280,11 @@ const Hero: React.FC<HeroProps> = ({
                       </p>
                       <Link
                         href={`/${countryCode}/products/${previewProduct.handle}`}
-                        className="group/product-cta inline-flex items-center justify-center space-x-2 bg-red-600 hover:bg-red-500 text-white rounded-lg px-6 py-3 transition-all duration-200 hover:shadow-lg hover:shadow-red-500/25 transform hover:scale-105"
+                        className="group/product-cta inline-flex items-center justify-center space-x-2 bg-red-600 hover:bg-red-500 text-white rounded-lg px-6 py-3 transition-all duration-200 hover:shadow-lg hover:shadow-red-500/25 transform hover:scale-105 md:px-8"
                         aria-label={`View details for ${previewProduct.title}`}
                       >
                         <span className="font-semibold">Details ansehen</span>
-                        <svg className="h-4 w-4 transition-transform duration-200 group-hover/product-cta:translate-x-1" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                          <line x1="5" y1="12" x2="19" y2="12"></line>
-                          <polyline points="12 5 19 12 12 19"></polyline>
-                        </svg>
+                        <ArrowRightIcon className="h-4 w-4 transition-transform duration-200 group-hover/product-cta:translate-x-1" />
                       </Link>
                     </motion.div>
                   ) : (

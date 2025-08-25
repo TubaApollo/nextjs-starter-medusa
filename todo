@@ -1,7 +1,7 @@
 Tiered Pricing Show Up
 Category listing
 Product listing on start page
-- Search
+✓ Search - Navbar/Dedicated page logic implemented
 Reviews
 Newsletter
 - cookies
@@ -13,9 +13,9 @@ Produktfilter (Mailisearch)
 Direktbestellung
 Wishlist
 Payment method
-- Kategorie Suche
-- Magnifiyng glass 
+✓ Kategorie Suche - Working with proper separation
+✓ Magnifiyng glass - Conditional display logic
 Kundencenter Hover
 Kategorie Component Startseite
-
-Price fetching über Meilisearch
+Warnkorb teilen
+Warenkorb speichern

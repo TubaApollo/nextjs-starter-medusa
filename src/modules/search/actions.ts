@@ -13,13 +13,26 @@ interface Hits {
  * @param {string} query - search query
  */
 export async function search(query: string) {
-  // MeiliSearch
-  const queries = [{ params: { query }, indexName: SEARCH_INDEX_NAME }]
-  const { results } = (await searchClient.search(queries)) as Record<
-    string,
-    any
-  >
-  const { hits } = results[0] as { hits: Hits[] }
+  try {
+    if (!query || query.trim().length === 0) {
+      return []
+    }
 
-  return hits
+    // MeiliSearch
+    const queries = [{ params: { query: query.trim() }, indexName: SEARCH_INDEX_NAME }]
+    const { results } = (await searchClient.search(queries)) as Record<
+      string,
+      any
+    >
+    
+    if (!results || !Array.isArray(results) || results.length === 0) {
+      return []
+    }
+
+    const { hits } = results[0] as { hits: Hits[] }
+    return hits || []
+  } catch (error) {
+    console.error('Search error:', error)
+    return []
+  }
 }
