@@ -1,8 +1,9 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { Heart } from "lucide-react"
+import { Heart, Loader2 } from "lucide-react"
 import { useWishlist } from "@lib/context/wishlist-context"
+import { Button } from "@lib/components/ui/button"
 import { cn } from "@lib/lib/utils"
 
 interface WishlistButtonProps {
@@ -12,6 +13,7 @@ interface WishlistButtonProps {
   iconClassName?: string
   showText?: boolean
   size?: "sm" | "md" | "lg"
+  variant?: "default" | "ghost" | "outline"
 }
 
 export default function WishlistButton({
@@ -20,9 +22,10 @@ export default function WishlistButton({
   className,
   iconClassName,
   showText = true,
-  size = "md"
+  size = "md",
+  variant = "ghost"
 }: WishlistButtonProps) {
-  const { toggleItem, isInWishlist, wishlist, isAuthenticated } = useWishlist()
+  const { toggleItem, isInWishlist, wishlist } = useWishlist()
   const [isLoading, setIsLoading] = useState(false)
   const [isWishlisted, setIsWishlisted] = useState(false)
 
@@ -37,16 +40,11 @@ export default function WishlistButton({
     
     if (isLoading) return
 
-    // If user is not authenticated, the toggleItem will handle the redirect
     setIsLoading(true)
     try {
-      console.log(`Toggling wishlist for variant ${variantId}, currently wishlisted: ${isWishlisted}`)
       const success = await toggleItem(variantId)
-      
       if (success) {
-        // Optimistically update local state
         setIsWishlisted(!isWishlisted)
-        console.log(`Successfully toggled wishlist, new state: ${!isWishlisted}`)
       }
     } catch (error) {
       console.error("Failed to toggle wishlist item:", error)
@@ -55,30 +53,32 @@ export default function WishlistButton({
     }
   }
 
-  const sizeClasses = {
-    sm: "h-3 w-3",
-    md: "h-4 w-4", 
-    lg: "h-5 w-5"
-  }
+  const sizeMap = {
+    sm: { button: "sm", icon: "h-3 w-3" },
+    md: { button: "sm", icon: "h-4 w-4" },
+    lg: { button: "default", icon: "h-5 w-5" }
+  } as const
 
   return (
-    <button
+    <Button
       type="button"
+      variant={variant}
+      size={sizeMap[size].button}
       onClick={handleToggle}
       disabled={isLoading}
       className={cn(
-        "inline-flex items-center gap-2 hover:text-ui-fg-base transition-colors",
-        isWishlisted && "text-red-500 hover:text-red-600",
+        "gap-2 transition-colors",
+        isWishlisted && "text-red-500 hover:text-red-600 hover:bg-red-50",
         className
       )}
       aria-label={isWishlisted ? "Von Merkliste entfernen" : "Zu Merkliste hinzufügen"}
     >
       {isLoading ? (
-        <div className={cn("animate-spin rounded-full border-2 border-current border-t-transparent", sizeClasses[size])} />
+        <Loader2 className={cn("animate-spin", sizeMap[size].icon)} />
       ) : (
         <Heart 
           className={cn(
-            sizeClasses[size], 
+            sizeMap[size].icon,
             iconClassName,
             isWishlisted && "fill-current"
           )} 
@@ -89,6 +89,6 @@ export default function WishlistButton({
           {isWishlisted ? "Gemerkt" : "Merken"}
         </span>
       )}
-    </button>
+    </Button>
   )
 }

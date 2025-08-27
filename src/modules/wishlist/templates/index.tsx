@@ -9,6 +9,7 @@ import { useCustomer } from "@lib/context/customer-context"
 import { getShareToken } from "@lib/data/wishlist"
 import { getPricesForVariant } from "@lib/util/get-product-price"
 import PreviewPrice from "@modules/products/components/product-preview/price"
+import ProductPreview from "@modules/products/components/product-preview"
 
 // Shadcn components
 import { Button } from "@lib/components/ui/button"
@@ -21,7 +22,7 @@ import { AspectRatio } from "@lib/components/ui/aspect-ratio"
 
 export default function WishlistTemplate() {
   const { wishlist, removeItem, totalItems, isLoading } = useWishlist()
-  const { isAuthenticated } = useCustomer()
+  const { isAuthenticated, isLoading: customerLoading } = useCustomer()
   const [shareUrl, setShareUrl] = useState<string | null>(null)
   const [isSharing, setIsSharing] = useState(false)
   const [copySuccess, setCopySuccess] = useState(false)
@@ -57,7 +58,10 @@ export default function WishlistTemplate() {
     }
   }
 
-  if (isLoading) {
+  // Wait for either wishlist or customer state to finish loading before deciding
+  // whether to show the auth prompt. This prevents a brief "Anmelden" flash
+  // when the page mounts and customer info is still being fetched.
+  if (isLoading || customerLoading) {
     return (
       <div className="container mx-auto px-4 py-8">
         <div className="space-y-6">
@@ -87,8 +91,8 @@ export default function WishlistTemplate() {
     )
   }
 
-  // Show login prompt if not authenticated
-  if (!isAuthenticated) {
+  // Show login prompt if not authenticated (only after customer loading finished)
+  if (!isAuthenticated && !customerLoading) {
     return (
       <div className="container mx-auto px-4 py-8">
         <Card className="border-dashed border-2 border-muted-foreground/25 max-w-md mx-auto">
@@ -101,7 +105,7 @@ export default function WishlistTemplate() {
               Sie müssen angemeldet sein, um Ihre Merkliste anzuzeigen und zu verwalten.
             </CardDescription>
             <LocalizedClientLink href="/account">
-              <Button className="gap-2">
+              <Button className="w-full gap-2" variant="outline">
                 <LogIn className="h-4 w-4" />
                 Jetzt anmelden
               </Button>
@@ -161,13 +165,17 @@ export default function WishlistTemplate() {
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
           {wishlist.items.map((item) => {
             const variant = item.product_variant
-            const product = variant?.product
-            const priceInfo = variant ? getPricesForVariant(variant) : null
-            
+            const product = variant?.product as any
+
             return (
-              <Card key={item.id} className="group overflow-hidden hover:shadow-lg transition-all duration-300 hover:-translate-y-1">
-                <CardContent className="p-0 relative">
-                  {/* Remove button */}
+              <div key={item.id} className="group">
+                <div className="relative">
+                  {/* Use the site's product card for consistent UI. ProductPreview expects a `region` prop;
+                      we pass a safe cast because ProductPreview doesn't currently require region at runtime.
+                      If you want proper region-aware pricing, we can fetch region server-side later. */}
+                  <ProductPreview product={product} region={{} as any} />
+
+                  {/* Remove button positioned over the card */}
                   <Button
                     variant="secondary"
                     size="sm"
@@ -177,64 +185,14 @@ export default function WishlistTemplate() {
                   >
                     <Trash2 className="h-4 w-4 text-red-500" />
                   </Button>
+                </div>
 
-                  {/* Product Link */}
-                  <LocalizedClientLink
-                    href={`/products/${product?.handle || ''}`}
-                    className="block"
-                  >
-                    {/* Product Image */}
-                    <AspectRatio ratio={1} className="bg-muted">
-                      <div className="p-4 h-full flex items-center justify-center">
-                        <Thumbnail
-                          thumbnail={product?.thumbnail}
-                          images={product?.images}
-                          size="full"
-                          className="w-full h-full object-contain max-h-48"
-                        />
-                      </div>
-                    </AspectRatio>
-                    
-                    {/* Product Info */}
-                    <div className="p-4 space-y-3">
-                      <div className="space-y-1">
-                        <h3 className="font-semibold line-clamp-2 group-hover:text-primary transition-colors">
-                          {product?.title || 'Unbekanntes Produkt'}
-                        </h3>
-                        
-                        {variant?.title && variant.title !== 'Default Title' && (
-                          <p className="text-sm text-muted-foreground">
-                            Variante: {variant.title}
-                          </p>
-                        )}
-                      </div>
-                      
-                      {variant?.sku && (
-                        <Badge variant="secondary" className="text-xs font-mono">
-                          SKU: {variant.sku}
-                        </Badge>
-                      )}
-                      
-                      {/* Price */}
-                      {priceInfo && (
-                        <div className="space-y-1">
-                          <div className="flex items-baseline gap-1">
-                            <PreviewPrice price={priceInfo} />
-                            <span className="text-xs text-muted-foreground">pro St.</span>
-                          </div>
-                        </div>
-                      )}
-                      
-                      <Separator />
-                      
-                      <div className="flex items-center justify-between text-xs text-muted-foreground">
-                        <span>Hinzugefügt am</span>
-                        <span>{new Date(item.created_at).toLocaleDateString('de-DE')}</span>
-                      </div>
-                    </div>
-                  </LocalizedClientLink>
-                </CardContent>
-              </Card>
+                {/* Added date row separate from the card - cleaner two-line layout */}
+                <div className="mt-2 text-xs text-muted-foreground">
+                  <div className="text-[11px]">Hinzugefügt am</div>
+                  <div className="text-sm font-medium mt-1">{new Date(item.created_at).toLocaleDateString('de-DE')}</div>
+                </div>
+              </div>
             )
           })}
         </div>
@@ -250,7 +208,7 @@ export default function WishlistTemplate() {
               Fügen Sie Produkte zu Ihrer Merkliste hinzu, um sie später anzusehen oder zu kaufen.
             </CardDescription>
             <LocalizedClientLink href="/store">
-              <Button className="gap-2">
+              <Button className="gap-2 w-full" variant="outline">
                 <ShoppingBag className="h-4 w-4" />
                 Produkte entdecken
               </Button>

@@ -308,6 +308,41 @@
     @apply border-industrial-red text-industrial-red;
   }
 
+  /* Small circular badge used for cart/wishlist counts */
+  .badge-count {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background-color: #ef4444; /* red-500 */
+    color: white;
+    font-size: 0.75rem; /* text-xs */
+    font-weight: 700;
+    height: 1.25rem; /* h-5 */
+    width: 1.25rem; /* w-5 */
+    border-radius: 9999px;
+    border: 2px solid white;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.12);
+    position: absolute;
+  line-height: 1;
+  transform: translateY(-10%);
+  }
+
+  /* Sonner toast icon vertical centering */
+  .toaster .toast .sn-toaster-icon, .toaster .toast .sn-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    height: 1.5rem;
+    width: 1.5rem;
+    vertical-align: middle;
+    line-height: 1;
+  }
+
+  .toaster .toast .sn-description {
+    display: inline-flex;
+    align-items: center;
+  }
+
   .card {
     @apply bg-white rounded-lg shadow-sm p-6 transition-all duration-200 ease-in-out border border-metal-silver;
   }

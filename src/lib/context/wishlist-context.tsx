@@ -3,6 +3,7 @@
 import React, { createContext, useContext, useEffect, useState, useCallback } from "react"
 import { Wishlist, addWishlistItem, removeWishlistItem, retrieveWishlist, createWishlist } from "@lib/data/wishlist"
 import { useCustomer } from "./customer-context"
+import { toast } from "sonner"
 
 interface WishlistContextType {
   wishlist: Wishlist | null
@@ -96,16 +97,13 @@ export function WishlistProvider({ children }: { children: React.ReactNode }) {
 
   const addItem = useCallback(async (variantId: string): Promise<boolean> => {
     if (!customer) {
-      console.log("❌ Benutzer nicht authentifiziert. Kann nicht zur Wunschliste hinzufügen.")
-      window.dispatchEvent(
-        new CustomEvent("auth-required-for-wishlist", {
-          detail: {
-            title: "Anmeldung erforderlich",
-            message:
-              "Sie müssen angemeldet sein, um Artikel zu Ihrer Merkliste hinzuzufügen.",
-          },
-        })
-      )
+      toast.error("Anmeldung erforderlich", {
+        description: "Sie müssen angemeldet sein, um Artikel zu Ihrer Merkliste hinzuzufügen.",
+        action: {
+          label: "Anmelden",
+          onClick: () => window.location.href = "/account"
+        }
+      })
       return false
     }
     
@@ -114,48 +112,48 @@ export function WishlistProvider({ children }: { children: React.ReactNode }) {
       if (result.wishlist) {
         setWishlist(result.wishlist)
         window.dispatchEvent(new CustomEvent("open-wishlist-dropdown"))
+        toast.success("Zur Merkliste hinzugefügt")
         return true
       } else {
         console.warn("⚠️ Artikel wurde möglicherweise nicht zur Wunschliste hinzugefügt")
-        // Reload wishlist to get current state
         await loadWishlist()
+        toast.error("Fehler beim Hinzufügen zur Merkliste")
         return false
       }
     } catch (error) {
       console.error("❌ Fehler beim Hinzufügen des Artikels zur Wunschliste:", error)
-      // Check if this is an auth error and refresh customer state
       if (error instanceof Error && error.message.includes('401')) {
-        console.log("🔄 Auth-Fehler erkannt, aktualisiere Kundenstatus...")
         window.dispatchEvent(new CustomEvent("auth-changed"))
       }
+      toast.error("Fehler beim Hinzufügen zur Merkliste")
       return false
     }
   }, [customer, loadWishlist])
 
   const removeItem = useCallback(async (itemId: string): Promise<boolean> => {
     if (!customer) {
-      console.log("❌ Benutzer nicht authentifiziert. Kann nicht von Wunschliste entfernen.")
+      toast.error("Nicht angemeldet", {
+        description: "Sie müssen angemeldet sein, um Artikel von Ihrer Merkliste zu entfernen."
+      })
       return false
     }
-    
     try {
       const success = await removeWishlistItem(itemId)
       if (success) {
         setWishlist(prev => prev ? { ...prev, items: prev.items.filter(item => item.id !== itemId) } : null)
+        toast.success("Von Merkliste entfernt")
         return true
       } else {
-        console.warn("⚠️ Artikel wurde möglicherweise nicht von der Wunschliste entfernt")
-        // Reload wishlist to get current state
         await loadWishlist()
+        toast.error("Fehler beim Entfernen von der Merkliste")
         return false
       }
     } catch (error) {
       console.error("❌ Fehler beim Entfernen des Artikels von der Wunschliste:", error)
-      // Check if this is an auth error and refresh customer state
       if (error instanceof Error && error.message.includes('401')) {
-        console.log("🔄 Auth-Fehler erkannt, aktualisiere Kundenstatus...")
         window.dispatchEvent(new CustomEvent("auth-changed"))
       }
+      toast.error("Fehler beim Entfernen von der Merkliste")
       return false
     }
   }, [customer, loadWishlist])

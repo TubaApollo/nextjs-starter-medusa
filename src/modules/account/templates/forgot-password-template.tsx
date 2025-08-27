@@ -1,6 +1,8 @@
 "use client"
 
 import { useState } from "react"
+import { AnimatePresence, motion as fmotion } from "framer-motion"
+import { XCircle } from "lucide-react"
 import { motion } from "framer-motion"
 import { Button } from "@lib/components/ui/button"
 import { Input } from "@lib/components/ui/input"
@@ -16,6 +18,7 @@ const ForgotPasswordTemplate = () => {
   const [isLoading, setIsLoading] = useState(false)
   const [message, setMessage] = useState<{ type: 'success' | 'error', text: string } | null>(null)
   const [isSubmitted, setIsSubmitted] = useState(false)
+  const [buttonState, setButtonState] = useState<'idle' | 'loading' | 'success' | 'error'>("idle")
 
   // Enhanced animation variants
   const containerVariants = {
@@ -44,30 +47,33 @@ const ForgotPasswordTemplate = () => {
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
-    
     if (!email) {
       setMessage({ type: 'error', text: 'E-Mail ist erforderlich' })
+      setButtonState('error')
+      setTimeout(() => setButtonState('idle'), 1800)
       return
     }
-
     setIsLoading(true)
     setMessage(null)
-
+    setButtonState('loading')
     try {
       await sdk.auth.resetPassword("customer", "emailpass", {
         identifier: email,
       })
-      
       setMessage({ 
         type: 'success', 
         text: 'Wenn ein Konto mit dieser E-Mail-Adresse existiert, erhalten Sie Anweisungen zum Zurücksetzen des Passworts.' 
       })
+      setButtonState('success')
+      setTimeout(() => setButtonState('idle'), 1800)
       setIsSubmitted(true)
     } catch (error: any) {
       setMessage({ 
         type: 'error', 
         text: error.message || 'Ein Fehler ist aufgetreten. Bitte versuchen Sie es erneut.' 
       })
+      setButtonState('error')
+      setTimeout(() => setButtonState('idle'), 1800)
     } finally {
       setIsLoading(false)
     }
@@ -244,20 +250,63 @@ const ForgotPasswordTemplate = () => {
                 <motion.div variants={fieldVariants}>
                   <Button
                     type="submit"
-                    disabled={isLoading}
-                    className="w-full bg-red-600 hover:bg-red-700 text-white transition-all duration-200 h-11 transform hover:scale-[1.02] active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
+                    disabled={isLoading || buttonState === 'success'}
+                    className={`w-full border h-11 font-semibold flex items-center justify-center gap-2 transition-all duration-200
+                      ${buttonState === 'success' ? 'border-green-500 bg-green-50 text-green-700 hover:bg-green-100' : ''}
+                      ${buttonState === 'error' ? 'border-red-500 bg-red-50 text-red-700 hover:bg-red-100' : (buttonState === 'idle' ? 'border-red-500 bg-red-50 text-red-700 hover:bg-red-100' : '')}`}
+                    style={{ position: 'relative', overflow: 'hidden' }}
                   >
-                    {isLoading ? (
-                      <div className="flex items-center">
-                        <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
-                        Wird gesendet...
-                      </div>
-                    ) : (
-                      <>
-                        <Mail className="mr-2 h-4 w-4" />
-                        Passwort zurücksetzen
-                      </>
-                    )}
+                    <AnimatePresence mode="wait" initial={false}>
+                      {buttonState === 'success' ? (
+                        <fmotion.span
+                          key="success"
+                          initial={{ opacity: 0, y: 6 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          exit={{ opacity: 0, y: -6 }}
+                          transition={{ duration: 0.18 }}
+                          className="inline-flex items-center gap-2 text-green-700"
+                        >
+                          <CheckCircle className="h-5 w-5 text-green-600" />
+                          Mail versendet
+                        </fmotion.span>
+                      ) : buttonState === 'error' ? (
+                        <fmotion.span
+                          key="error"
+                          initial={{ opacity: 0, y: 6 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          exit={{ opacity: 0, y: -6 }}
+                          transition={{ duration: 0.18 }}
+                          className="inline-flex items-center gap-2"
+                        >
+                          <XCircle className="h-5 w-5 text-red-600" />
+                          Fehler
+                        </fmotion.span>
+                      ) : buttonState === 'loading' ? (
+                        <fmotion.span
+                          key="loading"
+                          initial={{ opacity: 0, y: 6 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          exit={{ opacity: 0, y: -6 }}
+                          transition={{ duration: 0.18 }}
+                          className="inline-flex items-center gap-2"
+                        >
+                          <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-red-600 mr-2"></div>
+                          Wird gesendet...
+                        </fmotion.span>
+                      ) : (
+                        <fmotion.span
+                          key="idle"
+                          initial={{ opacity: 0, y: 6 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          exit={{ opacity: 0, y: -6 }}
+                          transition={{ duration: 0.18 }}
+                          className="inline-flex items-center gap-2"
+                        >
+                          <Mail className="mr-2 h-4 w-4" />
+                          Passwort zurücksetzen
+                        </fmotion.span>
+                      )}
+                    </AnimatePresence>
                   </Button>
                 </motion.div>
               </motion.form>

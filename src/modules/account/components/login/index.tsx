@@ -1,16 +1,16 @@
 "use client"
 
-import { useActionState } from "react"
+import { useActionState, useState } from "react"
 import { motion } from "framer-motion"
 import { login } from "@lib/data/customer"
 import { LOGIN_VIEW } from "@modules/account/templates/login-template"
 import { Button } from "@lib/components/ui/button"
+import { AnimatePresence } from "framer-motion"
 import { Input } from "@lib/components/ui/input"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@lib/components/ui/card"
 import { Label } from "@lib/components/ui/label"
 import { Alert, AlertDescription } from "@lib/components/ui/alert"
-import { AlertCircle, Eye, EyeOff, Wifi, WifiOff, AlertTriangle } from "lucide-react"
-import { useState } from "react"
+import { AlertCircle, Eye, EyeOff, Wifi, WifiOff, AlertTriangle, XCircle } from "lucide-react"
 import LocalizedClientLink from "@modules/common/components/localized-client-link"
 
 type Props = {
@@ -68,6 +68,8 @@ const getErrorConfig = (message: string) => {
 const Login = ({ setCurrentView }: Props) => {
   const [message, formAction] = useActionState(login, null)
   const [showPassword, setShowPassword] = useState(false)
+  const [loginSuccess, setLoginSuccess] = useState(false)
+  const [loginError, setLoginError] = useState(false)
 
   // Enhanced animation variants for form fields
   const containerVariants = {
@@ -233,10 +235,65 @@ const Login = ({ setCurrentView }: Props) => {
               <motion.div variants={fieldVariants}>
                 <Button
                   type="submit"
-                  className="w-full bg-red-600 hover:bg-red-700 text-white transition-all duration-200 h-11 transform hover:scale-[1.02] active:scale-[0.98]"
+                  className={`w-full border h-11 font-semibold flex items-center justify-center gap-2 transition-all duration-200
+                    ${loginSuccess ? 'border-green-500 bg-green-50 text-green-700 hover:bg-green-100' : ''}
+                    ${loginError ? 'border-red-500 bg-red-50 text-red-700 hover:bg-red-100' : (!loginSuccess ? 'border-red-500 bg-red-50 text-red-700 hover:bg-red-100' : 'border-green-500 bg-green-50 text-green-700 hover:bg-green-100')}`}
                   data-testid="sign-in-button"
+                  disabled={loginSuccess}
+                  style={{ position: 'relative', overflow: 'hidden' }}
+                  onAnimationEnd={() => { if (loginError) setLoginError(false) }}
+                  onClick={e => {
+                    // Let the form submit, but reset error/success for animation
+                    setTimeout(() => {
+                      if (message && typeof message === 'string' && message.toLowerCase().includes('falsch')) {
+                        setLoginError(true)
+                        setLoginSuccess(false)
+                        setTimeout(() => setLoginError(false), 1800)
+                      } else if (!message) {
+                        setLoginSuccess(true)
+                        setTimeout(() => setLoginSuccess(false), 1800)
+                      }
+                    }, 400)
+                  }}
                 >
-                  Anmelden
+                  <AnimatePresence mode="wait" initial={false}>
+                    {loginSuccess ? (
+                      <motion.span
+                        key="success"
+                        initial={{ opacity: 0, y: 6 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: -6 }}
+                        transition={{ duration: 0.18 }}
+                        className="inline-flex items-center gap-2 text-green-700"
+                      >
+                        <svg className="h-5 w-5 text-green-600" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" /></svg>
+                        Willkommen!
+                      </motion.span>
+                    ) : loginError ? (
+                      <motion.span
+                        key="error"
+                        initial={{ opacity: 0, y: 6 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: -6 }}
+                        transition={{ duration: 0.18 }}
+                        className="inline-flex items-center gap-2"
+                      >
+                        <XCircle className="h-5 w-5 text-red-600" />
+                        E-Mail/Login falsch
+                      </motion.span>
+                    ) : (
+                      <motion.span
+                        key="idle"
+                        initial={{ opacity: 0, y: 6 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: -6 }}
+                        transition={{ duration: 0.18 }}
+                        className="inline-flex items-center gap-2"
+                      >
+                        Anmelden
+                      </motion.span>
+                    )}
+                  </AnimatePresence>
                 </Button>
               </motion.div>
             </motion.form>

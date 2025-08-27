@@ -5,6 +5,7 @@ import { motion } from "framer-motion"
 import { signup } from "@lib/data/customer"
 import { LOGIN_VIEW } from "@modules/account/templates/login-template"
 import { Button } from "@lib/components/ui/button"
+import { AnimatePresence } from "framer-motion"
 import { Input } from "@lib/components/ui/input"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@lib/components/ui/card"
 import { Label } from "@lib/components/ui/label"
@@ -370,15 +371,46 @@ const Register = ({ setCurrentView }: Props) => {
               )}
 
               <motion.div variants={fieldVariants}>
-                <Button
-                  type="submit"
-                  disabled={!agreedToTerms || !isPasswordValid(password)}
-                  className="w-full bg-red-600 hover:bg-red-700 text-white transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed h-11 transform hover:scale-[1.02] active:scale-[0.98] disabled:transform-none"
-                  data-testid="register-button"
-                >
-                  <CheckCircle className="mr-2 h-4 w-4" />
-                  Konto erstellen
-                </Button>
+                <AnimatePresence mode="wait" initial={false}>
+                  {message && typeof message === 'string' && (message.toLowerCase().includes('erfolgreich') || message.toLowerCase().includes('success')) ? (
+                    <motion.span
+                      key="success"
+                      initial={{ opacity: 0, y: 6 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: -6 }}
+                      transition={{ duration: 0.18 }}
+                      className="block"
+                    >
+                      <Button
+                        type="button"
+                        className="w-full border border-green-500 bg-green-50 text-green-700 hover:bg-green-100 transition-all duration-200 h-11 font-semibold flex items-center justify-center gap-2"
+                        disabled
+                      >
+                        <CheckCircle className="mr-2 h-4 w-4 text-green-600" />
+                        Erfolgreich!
+                      </Button>
+                    </motion.span>
+                  ) : (
+                    <motion.span
+                      key="idle"
+                      initial={{ opacity: 0, y: 6 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: -6 }}
+                      transition={{ duration: 0.18 }}
+                      className="block"
+                    >
+                      <Button
+                        type="submit"
+                        disabled={!agreedToTerms || !isPasswordValid(password)}
+                        className="w-full border border-red-500 bg-red-50 text-red-700 hover:bg-red-100 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed h-11 font-semibold flex items-center justify-center gap-2"
+                        data-testid="register-button"
+                      >
+                        <CheckCircle className="mr-2 h-4 w-4" />
+                        Konto erstellen
+                      </Button>
+                    </motion.span>
+                  )}
+                </AnimatePresence>
               </motion.div>
             </motion.form>
 

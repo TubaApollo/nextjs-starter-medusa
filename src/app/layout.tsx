@@ -3,6 +3,7 @@ import { Metadata } from "next"
 import "styles/globals.css"
 import 'vanilla-cookieconsent/dist/cookieconsent.css';
 import CookieConsentComponent from "@modules/cookieconsent/CookieConsent";
+import { Toaster } from "sonner"
 
 export const metadata: Metadata = {
   metadataBase: new URL(getBaseURL()),
@@ -27,6 +28,7 @@ export default function RootLayout(props: { children: React.ReactNode }) {
             </WishlistProvider>
           </SearchModalProvider>
         </CustomerProvider>
+        <Toaster position="bottom-right" richColors closeButton />
         <CookieConsentComponent />
       </body>
     </html>

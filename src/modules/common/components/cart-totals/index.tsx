@@ -1,5 +1,6 @@
 "use client"
 
+import { Separator } from "@lib/components/ui/separator"
 import { convertToLocale } from "@lib/util/money"
 import React, { useMemo } from "react"
 
@@ -54,66 +55,67 @@ const CartTotals: React.FC<CartTotalsProps> = ({ totals }) => {
   }, [itemsNet, discount, gift, shipping])
 
   return (
-    <div>
-      <div className="flex flex-col gap-y-2 txt-medium text-ui-fg-subtle ">
+    <div className="space-y-4">
+      <div className="space-y-3">
         <div className="flex items-center justify-between">
-          <span className="flex gap-x-1 items-center">Zwischensumme netto</span>
-          <span data-testid="cart-subtotal" data-value={itemsNet}>
+          <span className="text-gray-600">Zwischensumme netto</span>
+          <span className="font-medium" data-testid="cart-subtotal" data-value={itemsNet}>
             {convertToLocale({ amount: itemsNet, currency_code })}
           </span>
         </div>
+        
         {!!discount && (
           <div className="flex items-center justify-between">
-            <span>Rabatt</span>
-            <span
-              className="text-ui-fg-interactive"
-              data-testid="cart-discount"
-              data-value={discount}
-            >
+            <span className="text-gray-600">Rabatt</span>
+            <span className="text-green-600 font-medium" data-testid="cart-discount" data-value={discount}>
               - {convertToLocale({ amount: discount, currency_code })}
             </span>
           </div>
         )}
+        
         {!!gift && (
           <div className="flex items-center justify-between">
-            <span>Gutschein</span>
-            <span
-              className="text-ui-fg-interactive"
-              data-testid="cart-gift-card-amount"
-              data-value={gift}
-            >
+            <span className="text-gray-600">Gutschein</span>
+            <span className="text-green-600 font-medium" data-testid="cart-gift-card-amount" data-value={gift}>
               - {convertToLocale({ amount: gift, currency_code })}
             </span>
           </div>
         )}
+        
         <div className="flex items-center justify-between">
-          <span>Versandkosten</span>
-          <span data-testid="cart-shipping" data-value={shipping}>
+          <span className="text-gray-600">Versandkosten</span>
+          <span className="font-medium" data-testid="cart-shipping" data-value={shipping}>
             {convertToLocale({ amount: shipping, currency_code })}
           </span>
         </div>
       </div>
-      <div className="h-px w-full border-b border-gray-200 my-4" />
-      <div className="flex items-center justify-between text-ui-fg-base mb-1 txt-medium ">
-        <span>Gesamtsumme netto</span>
-        <span className="txt-large" data-testid="cart-total-net" data-value={netTotal}>
-          {convertToLocale({ amount: netTotal, currency_code })}
-        </span>
+      
+      <Separator />
+      
+      <div className="space-y-2">
+        <div className="flex items-center justify-between">
+          <span className="text-gray-600">Gesamtsumme netto</span>
+          <span className="text-lg font-semibold" data-testid="cart-total-net" data-value={netTotal}>
+            {convertToLocale({ amount: netTotal, currency_code })}
+          </span>
+        </div>
+        
+        <div className="flex items-center justify-between">
+          <span className="text-gray-600">zzgl. MwSt.</span>
+          <span className="font-medium" data-testid="cart-taxes" data-value={taxes}>
+            {convertToLocale({ amount: taxes, currency_code })}
+          </span>
+        </div>
       </div>
-      <div className="flex items-center justify-between text-ui-fg-subtle mb-2 txt-medium ">
-        <span>zzgl. MwSt.</span>
-        <span data-testid="cart-taxes" data-value={taxes}>
-          {convertToLocale({ amount: taxes, currency_code })}
-        </span>
-      </div>
-      <div className="h-px w-full border-b border-gray-200 my-4" />
-      <div className="flex items-center justify-between text-ui-fg-base mb-2 font-semibold ">
-        <span>Gesamtsumme brutto</span>
-        <span className="txt-xlarge-plus" data-testid="cart-total" data-value={total || 0}>
+      
+      <Separator />
+      
+      <div className="flex items-center justify-between">
+        <span className="text-lg font-semibold">Gesamtsumme brutto</span>
+        <span className="text-2xl font-bold" data-testid="cart-total" data-value={total || 0}>
           {convertToLocale({ amount: total ?? 0, currency_code })}
         </span>
       </div>
-      <div className="h-px w-full border-b border-gray-200 mt-2" />
     </div>
   )
 }

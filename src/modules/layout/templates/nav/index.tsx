@@ -4,12 +4,12 @@ import { listRegions } from "@lib/data/regions"
 import { StoreRegion } from "@medusajs/types"
 import LocalizedClientLink from "@modules/common/components/localized-client-link"
 import CartButton from "@modules/layout/components/cart-button"
-import WishlistNavIcon from "@modules/layout/components/wishlist-nav-icon"
+import WishlistButton from "@modules/layout/components/wishlist-button"
 import SideMenu from "@modules/layout/components/side-menu"
 import SearchWrapper from "@modules/layout/components/search-wrapper"
 import MobileSearchButton from "@modules/layout/components/mobile-search-button"
 import MobileAccountButton from "@modules/layout/components/mobile-account-button"
-import { UserIcon, HeartIcon } from "@heroicons/react/24/outline"
+import { UserIcon, HeartIcon, ShoppingBagIcon as ShoppingBag } from "@heroicons/react/24/outline"
 
 export default async function Nav() {
   const regions = await listRegions().then((regions: StoreRegion[]) => regions)
@@ -64,7 +64,7 @@ export default async function Nav() {
                 </LocalizedClientLink>
               }
             >
-              <WishlistNavIcon />
+              <WishlistButton />
             </Suspense>
             <Suspense
               fallback={
@@ -73,7 +73,7 @@ export default async function Nav() {
                   href="/cart"
                   data-testid="nav-cart-link"
                 >
-                  Cart (0)
+                  <ShoppingBag className="w-6 h-6" />
                 </LocalizedClientLink>
               }
             >
