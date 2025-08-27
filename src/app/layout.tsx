@@ -8,14 +8,25 @@ export const metadata: Metadata = {
   metadataBase: new URL(getBaseURL()),
 }
 
-import { SearchModalProvider } from "@lib/context/search-modal-context"; // Add this import
+import { SearchModalProvider } from "@lib/context/search-modal-context"
+import { WishlistProvider } from "@lib/context/wishlist-context"
+import { CustomerProvider } from "@lib/context/customer-context"
+import { AuthMonitor } from "@lib/components/auth-monitor"
+import AuthNotification from "../components/auth-notification"
+
 export default function RootLayout(props: { children: React.ReactNode }) {
   return (
     <html lang="en" data-mode="light">
       <body>
-        <SearchModalProvider> {/* Wrap with SearchModalProvider */}
-          <main className="relative">{props.children}</main>
-        </SearchModalProvider>
+        <CustomerProvider>
+          <SearchModalProvider>
+            <WishlistProvider>
+              <AuthMonitor />
+              <AuthNotification />
+              <main className="relative">{props.children}</main>
+            </WishlistProvider>
+          </SearchModalProvider>
+        </CustomerProvider>
         <CookieConsentComponent />
       </body>
     </html>

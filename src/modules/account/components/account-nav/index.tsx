@@ -1,8 +1,9 @@
 "use client"
 
+import { useState } from "react"
 import { clx } from "@medusajs/ui"
 import { ArrowRightOnRectangle } from "@medusajs/icons"
-import { useParams, usePathname } from "next/navigation"
+import { useParams, usePathname, useRouter } from "next/navigation"
 
 import ChevronDown from "@modules/common/icons/chevron-down"
 import User from "@modules/common/icons/user"
@@ -10,7 +11,7 @@ import MapPin from "@modules/common/icons/map-pin"
 import Package from "@modules/common/icons/package"
 import LocalizedClientLink from "@modules/common/components/localized-client-link"
 import { HttpTypes } from "@medusajs/types"
-import { signout } from "@lib/data/customer"
+import { logoutWithAuthSync } from "@lib/client/auth"
 
 const AccountNav = ({
   customer,
@@ -19,9 +20,21 @@ const AccountNav = ({
 }) => {
   const route = usePathname()
   const { countryCode } = useParams() as { countryCode: string }
+  const router = useRouter()
+  const [isLoggingOut, setIsLoggingOut] = useState(false)
 
   const handleLogout = async () => {
-    await signout(countryCode)
+    setIsLoggingOut(true)
+    try {
+      const success = await logoutWithAuthSync()
+      
+      // Navigate to login page using Next.js router for smooth transition
+      if (success) {
+        router.push(`/${countryCode}/account`)
+      }
+    } finally {
+      setIsLoggingOut(false)
+    }
   }
 
   return (
@@ -93,11 +106,12 @@ const AccountNav = ({
                     type="button"
                     className="flex items-center justify-between py-4 border-b border-gray-200 px-8 w-full"
                     onClick={handleLogout}
+                    disabled={isLoggingOut}
                     data-testid="logout-button"
                   >
                     <div className="flex items-center gap-x-2">
                       <ArrowRightOnRectangle />
-                      <span>Log out</span>
+                      <span>{isLoggingOut ? "Logging out..." : "Log out"}</span>
                     </div>
                     <ChevronDown className="transform -rotate-90" />
                   </button>
@@ -154,9 +168,10 @@ const AccountNav = ({
                 <button
                   type="button"
                   onClick={handleLogout}
+                  disabled={isLoggingOut}
                   data-testid="logout-button"
                 >
-                  Log out
+                  {isLoggingOut ? "Logging out..." : "Log out"}
                 </button>
               </li>
             </ul>

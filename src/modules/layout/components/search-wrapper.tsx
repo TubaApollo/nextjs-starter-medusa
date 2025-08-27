@@ -2,7 +2,6 @@
 
 import { useState, useCallback, useRef, useEffect } from "react"
 import { motion, AnimatePresence } from "framer-motion"
-import { InstantSearch } from "react-instantsearch"
 import { useSearchBox, useHits, Index, Configure, Hits } from "react-instantsearch"
 import { InstantSearchNext } from "react-instantsearch-nextjs"
 import { searchClient, SEARCH_INDEX_NAME, CATEGORY_INDEX_NAME } from "@lib/search-client"
@@ -170,7 +169,7 @@ const SearchWrapperClient = () => {
         <div className="hidden md:block">
           <div className="flex justify-center">
             <div className="w-full max-w-md">
-              <InstantSearch searchClient={searchClient} indexName={SEARCH_INDEX_NAME}>
+              <InstantSearchNext searchClient={searchClient} indexName={SEARCH_INDEX_NAME}>
                 <SearchInput 
                   query={query} 
                   setQuery={setQuery}
@@ -244,7 +243,7 @@ const SearchWrapperClient = () => {
                     </div>
                   )}
                 </AnimatePresence>
-              </InstantSearch>
+              </InstantSearchNext>
             </div>
           </div>
         </div>
@@ -253,7 +252,7 @@ const SearchWrapperClient = () => {
         <div className="md:hidden">
           <AnimatePresence>
             {showDesktopResults && (
-              <InstantSearch searchClient={searchClient} indexName={SEARCH_INDEX_NAME}>
+              <InstantSearchNext searchClient={searchClient} indexName={SEARCH_INDEX_NAME}>
                 <motion.div
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
@@ -331,7 +330,7 @@ const SearchWrapperClient = () => {
                     )}
                   </div>
                 </motion.div>
-              </InstantSearch>
+              </InstantSearchNext>
             )}
           </AnimatePresence>
         </div>

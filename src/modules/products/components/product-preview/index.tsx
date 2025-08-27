@@ -5,7 +5,8 @@ import LocalizedClientLink from "@modules/common/components/localized-client-lin
 import Thumbnail from "../thumbnail"
 import PreviewPrice from "./price"
 import AddToCartButton from "@modules/products/components/add-to-cart-button"
-import { HeartIcon, ArrowsRightLeftIcon } from "@heroicons/react/24/outline"
+import WishlistButton from "@modules/common/components/wishlist-button"
+import { ArrowsRightLeftIcon } from "@heroicons/react/24/outline"
 import { Inter } from "next/font/google"
 
 const inter = Inter({ subsets: ["latin"], display: "swap" })
@@ -113,14 +114,16 @@ export default function ProductPreview({
             <ArrowsRightLeftIcon className="h-4 w-4" />
             <span className="hidden sm:inline">Vergleichen</span>
           </button>
-          <button
-            type="button"
-            className="inline-flex items-center gap-2 hover:text-ui-fg-base transition-colors"
-            aria-label="Merken"
-          >
-            <HeartIcon className="h-4 w-4" />
-            <span className="hidden sm:inline">Merken</span>
-          </button>
+          {Array.isArray(product.variants) && product.variants.length > 0 && (() => {
+            const firstVariant = product.variants[0] as any
+            return (
+              <WishlistButton
+                variantId={firstVariant?.id}
+                productHandle={product.handle}
+                size="md"
+              />
+            )
+          })()}
         </div>
         {/* Add to cart */}
         {Array.isArray(product.variants) && product.variants.length > 0 && (

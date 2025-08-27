@@ -4,7 +4,6 @@ import React, { useState, useEffect } from "react"
 import { useRouter, useSearchParams } from "next/navigation"
 import { motion } from "framer-motion"
 import {
-  InstantSearch,
   Index,
   Configure,
   SearchBox,
@@ -17,6 +16,7 @@ import {
   useInstantSearch,
   UseRefinementListProps,
 } from "react-instantsearch"
+import { InstantSearchNext } from "react-instantsearch-nextjs"
 import { Hit } from "instantsearch.js"
 import { useMediaQuery } from "@lib/hooks/use-media-query"
 import { searchClient, SEARCH_INDEX_NAME, CATEGORY_INDEX_NAME } from "@lib/search-client"
@@ -203,7 +203,7 @@ const ImprovedSearchPage = () => {
 
   return (
     <div className="container mx-auto px-4 py-8">
-      <InstantSearch 
+      <InstantSearchNext 
         searchClient={searchClient} 
         indexName={SEARCH_INDEX_NAME}
         routing={false}
@@ -408,7 +408,7 @@ const ImprovedSearchPage = () => {
             </>
           )}
         </div>
-      </InstantSearch>
+      </InstantSearchNext>
     </div>
   )
 }

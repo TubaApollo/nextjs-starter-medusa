@@ -68,6 +68,36 @@ export async function signup(_currentState: unknown, formData: FormData) {
     phone: formData.get("phone") as string,
   }
 
+  // Basic validation
+  if (!customerForm.email || !password || !customerForm.first_name || !customerForm.last_name) {
+    return "Bitte füllen Sie alle erforderlichen Felder aus."
+  }
+
+  if (!customerForm.email.includes('@')) {
+    return "Bitte geben Sie eine gültige E-Mail-Adresse ein."
+  }
+
+  if (password.length < 8) {
+    return "Das Passwort muss mindestens 8 Zeichen lang sein."
+  }
+
+  // Enhanced password validation
+  if (!/[A-Z]/.test(password)) {
+    return "Das Passwort muss mindestens einen Großbuchstaben enthalten."
+  }
+
+  if (!/[a-z]/.test(password)) {
+    return "Das Passwort muss mindestens einen Kleinbuchstaben enthalten."
+  }
+
+  if (!/[0-9]/.test(password)) {
+    return "Das Passwort muss mindestens eine Zahl enthalten."
+  }
+
+  if (!/[!@#$%^&*(),.?":{}|<>]/.test(password)) {
+    return "Das Passwort muss mindestens ein Sonderzeichen enthalten."
+  }
+
   try {
     const token = await sdk.auth.register("customer", "emailpass", {
       email: customerForm.email,
@@ -100,13 +130,56 @@ export async function signup(_currentState: unknown, formData: FormData) {
 
     return createdCustomer
   } catch (error: any) {
-    return error.toString()
+    // Handle specific registration errors
+    const errorMessage = error.message || error.toString()
+    
+    if (errorMessage.includes('already exists') || 
+        errorMessage.includes('Email already in use') ||
+        errorMessage.includes('User already exists')) {
+      return "Ein Konto mit dieser E-Mail-Adresse existiert bereits. Bitte verwenden Sie eine andere E-Mail-Adresse oder melden Sie sich an."
+    }
+    
+    if (errorMessage.includes('Invalid email') || 
+        errorMessage.includes('email format')) {
+      return "Bitte geben Sie eine gültige E-Mail-Adresse ein."
+    }
+    
+    if (errorMessage.includes('Password') && 
+        (errorMessage.includes('weak') || errorMessage.includes('short'))) {
+      return "Das Passwort erfüllt nicht alle Sicherheitsanforderungen. Bitte stellen Sie sicher, dass es mindestens 8 Zeichen lang ist und Groß- und Kleinbuchstaben, Zahlen sowie Sonderzeichen enthält."
+    }
+    
+    if (errorMessage.includes('network') || 
+        errorMessage.includes('fetch') ||
+        errorMessage.includes('connection')) {
+      return "Verbindungsfehler. Bitte überprüfen Sie Ihre Internetverbindung und versuchen Sie es erneut."
+    }
+    
+    if (error.status === 429) {
+      return "Zu viele Registrierungsversuche. Bitte warten Sie einen Moment und versuchen Sie es erneut."
+    }
+    
+    if (error.status >= 500) {
+      return "Ein Serverfehler ist aufgetreten. Bitte versuchen Sie es später erneut."
+    }
+    
+    // Fallback for any other errors
+    return "Registrierung fehlgeschlagen. Bitte versuchen Sie es erneut oder kontaktieren Sie den Support."
   }
 }
 
 export async function login(_currentState: unknown, formData: FormData) {
   const email = formData.get("email") as string
   const password = formData.get("password") as string
+
+  // Basic validation
+  if (!email || !password) {
+    return "Bitte geben Sie E-Mail-Adresse und Passwort ein."
+  }
+
+  if (!email.includes('@')) {
+    return "Bitte geben Sie eine gültige E-Mail-Adresse ein."
+  }
 
   try {
     await sdk.auth
@@ -117,13 +190,44 @@ export async function login(_currentState: unknown, formData: FormData) {
         revalidateTag(customerCacheTag)
       })
   } catch (error: any) {
-    return error.toString()
+    // Handle specific authentication errors
+    const errorMessage = error.message || error.toString()
+    
+    if (errorMessage.includes('Invalid email or password') || 
+        errorMessage.includes('invalid credentials') ||
+        errorMessage.includes('Unauthorized') ||
+        error.status === 401) {
+      return "E-Mail-Adresse oder Passwort sind ungültig. Bitte überprüfen Sie Ihre Eingaben."
+    }
+    
+    if (errorMessage.includes('User not found') || 
+        errorMessage.includes('Customer not found')) {
+      return "Ein Konto mit dieser E-Mail-Adresse wurde nicht gefunden."
+    }
+    
+    if (errorMessage.includes('network') || 
+        errorMessage.includes('fetch')) {
+      return "Verbindungsfehler. Bitte überprüfen Sie Ihre Internetverbindung."
+    }
+    
+    if (error.status === 429) {
+      return "Zu viele Anmeldeversuche. Bitte warten Sie einen Moment."
+    }
+    
+    if (error.status >= 500) {
+      return "Ein Serverfehler ist aufgetreten. Bitte versuchen Sie es später erneut."
+    }
+    
+    // Fallback for any other errors
+    return "Anmeldung fehlgeschlagen. Bitte versuchen Sie es erneut."
   }
 
   try {
     await transferCart()
   } catch (error: any) {
-    return error.toString()
+    // Cart transfer errors are less critical, log but don't show to user
+    console.error('Cart transfer failed:', error)
+    // Continue without showing error to user
   }
 }
 
@@ -141,6 +245,18 @@ export async function signout(countryCode: string) {
   revalidateTag(cartCacheTag)
 
   redirect(`/${countryCode}/account`)
+}
+
+export async function signoutWithoutRedirect() {
+  await sdk.auth.logout()
+  await removeAuthToken()
+  await removeCartId()
+
+  const customerCacheTag = await getCacheTag("customers")
+  revalidateTag(customerCacheTag)
+
+  const cartCacheTag = await getCacheTag("carts")
+  revalidateTag(cartCacheTag)
 }
 
 export async function transferCart() {

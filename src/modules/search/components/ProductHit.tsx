@@ -7,7 +7,8 @@ import { HttpTypes } from "@medusajs/types"
 import LocalizedClientLink from "@modules/common/components/localized-client-link"
 import Thumbnail from "@modules/products/components/thumbnail"
 import AddToCartButton from "@modules/products/components/add-to-cart-button"
-import { HeartIcon, ArrowsRightLeftIcon } from "@heroicons/react/24/outline"
+import WishlistButton from "@modules/common/components/wishlist-button"
+import { ArrowsRightLeftIcon } from "@heroicons/react/24/outline"
 import { Inter } from "next/font/google"
 import PreviewPrice from "@modules/products/components/product-preview/price"
 import { VariantPrice } from "types/global"
@@ -182,14 +183,13 @@ const ProductHitComponent = ({ hit }: ProductHitProps) => {
             <ArrowsRightLeftIcon className="h-4 w-4" />
             <span className="hidden sm:inline">Vergleichen</span>
           </button>
-          <button
-            type="button"
-            className="inline-flex items-center gap-2 hover:text-ui-fg-base transition-colors"
-            aria-label="Merken"
-          >
-            <HeartIcon className="h-4 w-4" />
-            <span className="hidden sm:inline">Merken</span>
-          </button>
+          {selectedVariant && (
+            <WishlistButton
+              variantId={selectedVariant.id}
+              productHandle={hit.handle}
+              size="md"
+            />
+          )}
         </div>
 
         {/* Add to cart: always render on search page; uses variant when present or product fallback */}
