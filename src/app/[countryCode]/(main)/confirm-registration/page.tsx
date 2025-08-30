@@ -24,39 +24,91 @@ export default function ConfirmRegistrationPage() {
 
     const confirm = async () => {
       try {
-        const res = await fetch(`${PROXY_ENDPOINT}?token=${encodeURIComponent(token)}`, {
+        // Request JSON so proxy/backend returns structured responses instead of redirects
+        const url = `${PROXY_ENDPOINT}?token=${encodeURIComponent(token)}&format=json`
+        const res = await fetch(url, {
           method: "GET",
+          headers: { Accept: "application/json" },
+          // optional: prevent automatic redirect following so we can inspect redirect responses
+          redirect: "manual",
         })
 
+        // Prevent double-execution in React Strict Mode (dev) or accidental re-renders
+        // Use a simple guard stored on window to survive mount/unmount during dev double-render
+        try {
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          const w = window as any
+          if (w.__confirmRegistrationCalled && w.__confirmRegistrationCalled === token) {
+            return
+          }
+          w.__confirmRegistrationCalled = token
+        } catch (e) {
+          // ignore if window isn't available for some reason
+        }
         if (!mounted) return
 
-        setStatus(res.status)
+  setStatus(res.status)
 
-        // Treat any status < 400 as success (covers some proxied redirects or no-content responses)
-        if (res.status < 400) {
-          setMessage("Your registration has been confirmed! Redirecting to login...")
-          setTimeout(() => router.push(`/${getCountryFromPath()}/account/login?confirmed=true`), 2500)
+        // Parse JSON response from proxy
+        let json: any = null
+        try {
+          json = await res.json()
+        } catch (e) {
+          json = null
+        }
+
+        if (res.ok && json?.success) {
+          // treat attached, already_attached and fallback as success
+          const action = json.action
+          if (action === "attached" || action === "already_attached" || action === "fallback") {
+            setMessage(json.message || "Your registration has been confirmed. Redirecting to your account...")
+            setResponseText(JSON.stringify(json, null, 2))
+            setTimeout(() => {
+              try {
+                window.dispatchEvent(new Event('auth-changed'))
+              } catch (e) {
+                // ignore
+              }
+              router.push(`/${getCountryFromPath()}/account`)
+            }, 2500)
+            return
+          }
+
+          // Generic success when backend says success but action is unexpected
+          setMessage("Your registration has been confirmed! Redirecting to your account...")
+          setResponseText(JSON.stringify(json, null, 2))
+          setTimeout(() => {
+            try {
+              window.dispatchEvent(new Event('auth-changed'))
+            } catch (e) {
+              // ignore
+            }
+            router.push(`/${getCountryFromPath()}/account`)
+          }, 2500)
           return
         }
 
-        // Try to get JSON first, then text
-        let bodyText = null
-        try {
-          const json = await res.json()
-          bodyText = JSON.stringify(json)
-        } catch (e) {
-          try {
-            bodyText = await res.text()
-          } catch (__) {
-            bodyText = null
-          }
+        // Handle client error (invalid/expired token)
+        if (res.status === 400) {
+          const errMsg = json?.error ?? json?.message ?? "Invalid or expired token"
+          setResponseText(JSON.stringify(json ?? { error: errMsg }, null, 2))
+          setMessage(`Confirmation failed: ${errMsg}`)
+          console.error('Confirm registration invalid token', errMsg)
+          return
         }
 
-  const displayBody = bodyText === null || bodyText === "" ? "(empty)" : bodyText
-  setResponseText(displayBody)
-  setMessage(`Confirmation failed: ${displayBody ?? `status ${res.status}`}`)
-  // Only log as error for >=400 statuses
-  console.error(`Confirm registration failed status=${res.status}`, displayBody)
+        // Other errors -> workflow failure
+        const errMsg = json?.error ?? json?.message ?? "Failed to attach customer to auth identity"
+        setResponseText(JSON.stringify(json ?? { error: errMsg }, null, 2))
+        // If proxy returned backend status or details, show actionable guidance
+        if (res.status === 502 || json?.error?.toLowerCase?.().includes('server fetch failed') || json?.details) {
+          setMessage(`Confirmation failed: ${errMsg}. Check that your Medusa backend is running and that NEXT_PUBLIC_MEDUSA_BACKEND_URL / MEDUSA_BACKEND_URL is correct.`)
+          console.error('Confirm registration proxy/server fetch failure', { status: res.status, body: json })
+          return
+        }
+
+        setMessage(`Confirmation failed: ${errMsg}`)
+        console.error('Confirm registration workflow failure', errMsg)
       } catch (err: any) {
         // Network error or CORS or DNS issue (e.g., "Failed to fetch")
         console.error('Confirm registration fetch error', err)

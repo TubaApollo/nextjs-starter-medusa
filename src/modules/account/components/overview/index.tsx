@@ -12,10 +12,13 @@ type OverviewProps = {
 }
 
 const Overview = ({ customer, orders }: OverviewProps) => {
+  // Show email confirmation banner for unconfirmed users
+  const EmailConfirmationBanner = require("../email-confirmation-banner").default
   const completion = getProfileCompletion(customer)
 
   return (
     <div data-testid="overview-page-wrapper" className="space-y-6">
+  {customer && <EmailConfirmationBanner customer={customer} />}
   <div className="flex items-center justify-between mb-6">
         <div>
           <h1 className="text-2xl font-semibold">Hallo {customer?.first_name}</h1>
