@@ -15,42 +15,35 @@ const CartTemplate = ({
 }) => {
   return (
     <div className="py-12">
-      <div className="content-container" data-testid="cart-container">
+      <div className="content-container h-full max-w-6xl mx-auto" data-testid="cart-container">
         {cart?.items?.length ? (
           <div className="grid grid-cols-1 small:grid-cols-[1fr_400px] gap-x-10 gap-y-8">
-            <div className="flex flex-col gap-y-6">
+            <main className="flex-1 bg-white rounded-lg border border-gray-100 shadow-sm p-6">
               {!customer && (
-                <Card className="mb-2">
-                  <CardContent className="py-6">
-                    <SignInPrompt />
-                  </CardContent>
-                </Card>
-              )}
-              <Card>
-                <CardHeader>
-                  <CardTitle className="text-2xl font-bold">Warenkorb</CardTitle>
-                </CardHeader>
-                <Separator />
-                <CardContent className="p-0">
-                  <ItemsTemplate cart={cart} />
-                </CardContent>
-              </Card>
-            </div>
-            <div className="relative">
-              <div className="flex flex-col gap-y-8 sticky top-12">
-                {cart && cart.region && (
-                  <Card className="mb-2">
-                    <CardHeader>
-                      <CardTitle className="text-xl font-semibold">Zusammenfassung</CardTitle>
-                    </CardHeader>
-                    <Separator />
-                    <CardContent>
-                      <Summary cart={cart as any} />
+                <div className="mb-4">
+                  <Card>
+                    <CardContent className="py-6">
+                      <SignInPrompt />
                     </CardContent>
                   </Card>
+                </div>
+              )}
+
+              <div>
+                <ItemsTemplate cart={cart} />
+              </div>
+            </main>
+
+            <aside className="w-full">
+              <div className="sticky top-12">
+                {cart && cart.region && (
+                  <div className="bg-white rounded-lg border border-gray-100 shadow-sm p-6">
+                    <h2 className="text-xl font-semibold mb-4">Zusammenfassung</h2>
+                    <Summary cart={cart as any} />
+                  </div>
                 )}
               </div>
-            </div>
+            </aside>
           </div>
         ) : (
           <div className="container mx-auto px-4 py-8">

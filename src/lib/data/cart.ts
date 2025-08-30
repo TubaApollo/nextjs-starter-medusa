@@ -247,16 +247,26 @@ export async function deleteLineItem(lineId: string) {
     ...(await getAuthHeaders()),
   }
 
-  await sdk.store.cart
+  const resp = await sdk.store.cart
     .deleteLineItem(cartId, lineId, headers)
-    .then(async () => {
+    .then(async (r) => {
       const cartCacheTag = await getCacheTag("carts")
       revalidateTag(cartCacheTag)
 
       const fulfillmentCacheTag = await getCacheTag("fulfillment")
       revalidateTag(fulfillmentCacheTag)
+
+      return r
     })
     .catch(medusaError)
+
+  // Return the updated cart so callers can react (e.g., redirect on empty)
+  try {
+    const updatedCart = await retrieveCart(cartId)
+    return updatedCart
+  } catch (_) {
+    return null
+  }
 }
 
 export async function setShippingMethod({

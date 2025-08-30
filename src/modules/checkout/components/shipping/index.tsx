@@ -6,7 +6,8 @@ import { calculatePriceForShippingOption } from "@lib/data/fulfillment"
 import { convertToLocale } from "@lib/util/money"
 import { CheckCircleSolid, Loader } from "@medusajs/icons"
 import { HttpTypes } from "@medusajs/types"
-import { Button, Heading, Text, clx } from "@medusajs/ui"
+import { Button, Text, clx } from "@medusajs/ui"
+import SectionHeader from "@modules/checkout/components/section-header"
 import ErrorMessage from "@modules/checkout/components/error-message"
 import Divider from "@modules/common/components/divider"
 import MedusaRadio from "@modules/common/components/radio"
@@ -151,45 +152,28 @@ const Shipping: React.FC<ShippingProps> = ({
   return (
     <div className="bg-white">
       <div className="flex flex-row items-center justify-between mb-6">
-        <Heading
-          level="h2"
-          className={clx(
-            "flex flex-row text-3xl-regular gap-x-2 items-baseline",
-            {
-              "opacity-50 pointer-events-none select-none":
-                !isOpen && cart.shipping_methods?.length === 0,
-            }
-          )}
-        >
-          Delivery
-          {!isOpen && (cart.shipping_methods?.length ?? 0) > 0 && (
-            <CheckCircleSolid />
-          )}
-        </Heading>
-        {!isOpen &&
-          cart?.shipping_address &&
-          cart?.billing_address &&
-          cart?.email && (
-            <Text>
-              <button
-                onClick={handleEdit}
-                className="text-ui-fg-interactive hover:text-ui-fg-interactive-hover"
-                data-testid="edit-delivery-button"
-              >
-                Edit
-              </button>
-            </Text>
-          )}
+  <SectionHeader title="Lieferung" index={2} isOpen={isOpen} completed={!isOpen} className={clx({ 'opacity-50 pointer-events-none select-none': !isOpen && cart.shipping_methods?.length === 0 })} />
+        {!isOpen && cart?.shipping_address && cart?.billing_address && cart?.email && (
+          <Text>
+            <button
+              onClick={handleEdit}
+              className="text-ui-fg-interactive hover:text-ui-fg-interactive-hover"
+              data-testid="edit-delivery-button"
+            >
+              Edit
+            </button>
+          </Text>
+        )}
       </div>
       {isOpen ? (
         <>
           <div className="grid">
             <div className="flex flex-col">
               <span className="font-medium txt-medium text-ui-fg-base">
-                Shipping method
+                Versandart
               </span>
               <span className="mb-4 text-ui-fg-muted txt-medium">
-                How would you like you order delivered
+                Wie soll Ihre Bestellung geliefert werden?
               </span>
             </div>
             <div data-testid="delivery-options-container">
@@ -223,7 +207,7 @@ const Shipping: React.FC<ShippingProps> = ({
                           checked={showPickupOptions === PICKUP_OPTION_ON}
                         />
                         <span className="text-base-regular">
-                          Pick up your order
+                          Bestellung abholen
                         </span>
                       </div>
                       <span className="justify-self-end text-ui-fg-base">
@@ -295,11 +279,11 @@ const Shipping: React.FC<ShippingProps> = ({
             <div className="grid">
               <div className="flex flex-col">
                 <span className="font-medium txt-medium text-ui-fg-base">
-                  Store
-                </span>
-                <span className="mb-4 text-ui-fg-muted txt-medium">
-                  Choose a store near you
-                </span>
+                    Filiale
+                  </span>
+                  <span className="mb-4 text-ui-fg-muted txt-medium">
+                    Wählen Sie eine Filiale in Ihrer Nähe
+                  </span>
               </div>
               <div data-testid="delivery-options-container">
                 <div className="pb-8 md:pt-0 pt-2">
@@ -368,7 +352,7 @@ const Shipping: React.FC<ShippingProps> = ({
               disabled={!cart.shipping_methods?.[0]}
               data-testid="submit-delivery-option-button"
             >
-              Continue to payment
+              Weiter zu Zahlung
             </Button>
           </div>
         </>

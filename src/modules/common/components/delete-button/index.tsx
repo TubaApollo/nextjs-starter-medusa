@@ -8,11 +8,13 @@ const DeleteButton = ({
   children,
   className,
   onClick,
+  onDeleted,
 }: {
   id: string
   children?: React.ReactNode
   className?: string
   onClick?: (id: string) => Promise<void> | void
+  onDeleted?: (updatedCart: any | null) => void | Promise<void>
 }) => {
   const [isDeleting, setIsDeleting] = useState(false)
 
@@ -21,8 +23,10 @@ const DeleteButton = ({
     try {
       if (onClick) {
         await onClick(id)
+        if (onDeleted) onDeleted(null)
       } else {
-        await deleteLineItem(id)
+        const updatedCart = await deleteLineItem(id)
+        if (onDeleted) await onDeleted(updatedCart)
       }
     } catch (err) {
       // ignore - keep UX consistent
@@ -34,17 +38,17 @@ const DeleteButton = ({
   return (
     <div className="flex items-center justify-between text-sm">
       <Button
-        variant="ghost"
+        variant="secondary"
         size="sm"
-        className={`gap-2 h-8 ${className ?? ''}`}
-  onClick={() => handleDelete(id)}
+        className={`h-8 w-8 p-0 ${className ?? "bg-white/90 hover:bg-white shadow-sm"}`}
+        onClick={() => handleDelete(id)}
+        aria-label="Entfernen"
       >
         {isDeleting ? (
           <div className="h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent" />
         ) : (
-          <Trash2 className="h-4 w-4 text-destructive" />
+          <Trash2 className="h-4 w-4 text-red-600" />
         )}
-        {children ? <span className="text-sm">{children}</span> : null}
       </Button>
     </div>
   )
