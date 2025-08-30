@@ -9,7 +9,7 @@ import { HttpTypes } from "@medusajs/types"
 // import { updateCustomer } from "@lib/data/customer"
 
 type MyInformationProps = {
-  customer: HttpTypes.StoreCustomer
+  customer?: HttpTypes.StoreCustomer | null
 }
 
 const ProfileEmail: React.FC<MyInformationProps> = ({ customer }) => {
@@ -48,8 +48,8 @@ const ProfileEmail: React.FC<MyInformationProps> = ({ customer }) => {
   return (
     <form action={formAction} className="w-full">
       <AccountInfo
-        label="Email"
-        currentInfo={`${customer.email}`}
+        label="E-Mail"
+        currentInfo={customer?.email ?? ""}
         isSuccess={successState}
         isError={!!state.error}
         errorMessage={state.error}
@@ -58,12 +58,12 @@ const ProfileEmail: React.FC<MyInformationProps> = ({ customer }) => {
       >
         <div className="grid grid-cols-1 gap-y-2">
           <Input
-            label="Email"
+            label="E-Mail"
             name="email"
             type="email"
             autoComplete="email"
             required
-            defaultValue={customer.email}
+            defaultValue={customer?.email ?? ""}
             data-testid="email-input"
           />
         </div>

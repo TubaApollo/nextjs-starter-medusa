@@ -1,6 +1,6 @@
 "use client"
 
-import { useActionState, useState } from "react"
+import { useActionState, useState, useEffect, useRef } from "react"
 import { motion } from "framer-motion"
 import { login } from "@lib/data/customer"
 import { LOGIN_VIEW } from "@modules/account/templates/login-template"
@@ -70,6 +70,69 @@ const Login = ({ setCurrentView }: Props) => {
   const [showPassword, setShowPassword] = useState(false)
   const [loginSuccess, setLoginSuccess] = useState(false)
   const [loginError, setLoginError] = useState(false)
+  const successTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const errorTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const pendingSuccessTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const submittingRef = useRef(false)
+
+  // Clear timers on unmount
+  useEffect(() => {
+    return () => {
+      if (successTimerRef.current) clearTimeout(successTimerRef.current)
+      if (errorTimerRef.current) clearTimeout(errorTimerRef.current)
+  if (pendingSuccessTimerRef.current) clearTimeout(pendingSuccessTimerRef.current)
+    }
+  }, [])
+
+  // Watch for server messages to determine error state (including the German invalid credentials message)
+  useEffect(() => {
+    const m = message && typeof message === 'string' ? message.toLowerCase() : ''
+
+    // Detect invalid credentials / auth errors. This covers:
+    // - the explicit message: "E-Mail-Adresse oder Passwort sind ungültig. Bitte überprüfen Sie Ihre Eingaben."
+    // - common keywords like 'ungültig', 'falsch', 'nicht gefunden'
+    const isAuthError = m.includes('e-mail') && m.includes('passwort') && m.includes('ung')
+      || m.includes('ungültig')
+      || m.includes('falsch')
+      || m.includes('nicht gefunden')
+
+    if (isAuthError) {
+      // Cancel any success state and show the error state briefly (~2s)
+      if (successTimerRef.current) {
+        clearTimeout(successTimerRef.current)
+        successTimerRef.current = null
+      }
+      // Cancel any pending optimistic success
+      if (pendingSuccessTimerRef.current) {
+        clearTimeout(pendingSuccessTimerRef.current)
+        pendingSuccessTimerRef.current = null
+      }
+
+      setLoginSuccess(false)
+      setLoginError(true)
+
+  if (errorTimerRef.current) clearTimeout(errorTimerRef.current)
+      errorTimerRef.current = setTimeout(() => {
+        setLoginError(false)
+        errorTimerRef.current = null
+      }, 2000)
+  } else if (submittingRef.current) {
+      // No message and we were submitting -> treat as success
+      submittingRef.current = false
+  if (errorTimerRef.current) {
+        clearTimeout(errorTimerRef.current)
+        errorTimerRef.current = null
+      }
+
+      setLoginError(false)
+      setLoginSuccess(true)
+      if (successTimerRef.current) clearTimeout(successTimerRef.current)
+      successTimerRef.current = setTimeout(() => {
+        setLoginSuccess(false)
+        successTimerRef.current = null
+      }, 2000)
+    }
+  }, [message])
 
   // Enhanced animation variants for form fields
   const containerVariants = {
@@ -139,6 +202,29 @@ const Login = ({ setCurrentView }: Props) => {
           <CardContent>
             <motion.form 
               action={formAction} 
+              onSubmit={() => {
+                // Mark that we submitted so the message-effect can react if an error comes back.
+                submittingRef.current = true
+
+                // Start a short pending timer before showing the optimistic success state.
+                // If an auth error arrives quickly, the message-effect will cancel this pending timer
+                // and show the error instead, preventing a flash of "Willkommen" on failed logins.
+                if (pendingSuccessTimerRef.current) {
+                  clearTimeout(pendingSuccessTimerRef.current)
+                  pendingSuccessTimerRef.current = null
+                }
+                pendingSuccessTimerRef.current = setTimeout(() => {
+                  pendingSuccessTimerRef.current = null
+                  // show optimistic success
+                  setLoginError(false)
+                  setLoginSuccess(true)
+                  if (successTimerRef.current) clearTimeout(successTimerRef.current)
+                  successTimerRef.current = setTimeout(() => {
+                    setLoginSuccess(false)
+                    successTimerRef.current = null
+                  }, 2000)
+                }, 500)
+              }}
               className="space-y-4"
               data-auth-form="login"
               variants={containerVariants}
@@ -241,20 +327,7 @@ const Login = ({ setCurrentView }: Props) => {
                   data-testid="sign-in-button"
                   disabled={loginSuccess}
                   style={{ position: 'relative', overflow: 'hidden' }}
-                  onAnimationEnd={() => { if (loginError) setLoginError(false) }}
-                  onClick={e => {
-                    // Let the form submit, but reset error/success for animation
-                    setTimeout(() => {
-                      if (message && typeof message === 'string' && message.toLowerCase().includes('falsch')) {
-                        setLoginError(true)
-                        setLoginSuccess(false)
-                        setTimeout(() => setLoginError(false), 1800)
-                      } else if (!message) {
-                        setLoginSuccess(true)
-                        setTimeout(() => setLoginSuccess(false), 1800)
-                      }
-                    }, 400)
-                  }}
+                
                 >
                   <AnimatePresence mode="wait" initial={false}>
                     {loginSuccess ? (
@@ -269,7 +342,7 @@ const Login = ({ setCurrentView }: Props) => {
                         <svg className="h-5 w-5 text-green-600" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" /></svg>
                         Willkommen!
                       </motion.span>
-                    ) : loginError ? (
+          ) : loginError ? (
                       <motion.span
                         key="error"
                         initial={{ opacity: 0, y: 6 }}
@@ -279,7 +352,7 @@ const Login = ({ setCurrentView }: Props) => {
                         className="inline-flex items-center gap-2"
                       >
                         <XCircle className="h-5 w-5 text-red-600" />
-                        E-Mail/Login falsch
+            Login fehlgeschlagen
                       </motion.span>
                     ) : (
                       <motion.span

@@ -9,7 +9,7 @@ import { HttpTypes } from "@medusajs/types"
 import { updateCustomer } from "@lib/data/customer"
 
 type MyInformationProps = {
-  customer: HttpTypes.StoreCustomer
+  customer?: HttpTypes.StoreCustomer | null
 }
 
 const ProfileName: React.FC<MyInformationProps> = ({ customer }) => {
@@ -45,11 +45,13 @@ const ProfileName: React.FC<MyInformationProps> = ({ customer }) => {
     setSuccessState(state.success)
   }, [state])
 
+  const currentName = `${customer?.first_name ?? ""}${customer?.last_name ? ` ${customer.last_name}` : ""}`.trim()
+
   return (
     <form action={formAction} className="w-full overflow-visible">
       <AccountInfo
         label="Name"
-        currentInfo={`${customer.first_name} ${customer.last_name}`}
+        currentInfo={currentName}
         isSuccess={successState}
         isError={!!state?.error}
         clearState={clearState}
@@ -57,17 +59,17 @@ const ProfileName: React.FC<MyInformationProps> = ({ customer }) => {
       >
         <div className="grid grid-cols-2 gap-x-4">
           <Input
-            label="First name"
+            label="Vorname"
             name="first_name"
             required
-            defaultValue={customer.first_name ?? ""}
+            defaultValue={customer?.first_name ?? ""}
             data-testid="first-name-input"
           />
           <Input
-            label="Last name"
+            label="Nachname"
             name="last_name"
             required
-            defaultValue={customer.last_name ?? ""}
+            defaultValue={customer?.last_name ?? ""}
             data-testid="last-name-input"
           />
         </div>

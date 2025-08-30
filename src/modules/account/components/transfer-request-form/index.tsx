@@ -2,7 +2,8 @@
 
 import { useActionState } from "react"
 import { createTransferRequest } from "@lib/data/orders"
-import { Text, Heading, Input, Button, IconButton, Toaster } from "@medusajs/ui"
+import { Input } from "@lib/components/ui/input"
+import { Button } from "@lib/components/ui/button"
 import { SubmitButton } from "@modules/checkout/components/submit-button"
 import { CheckCircleMiniSolid, XCircleSolid } from "@medusajs/icons"
 import { useEffect, useState } from "react"
@@ -26,54 +27,47 @@ export default function TransferRequestForm() {
     <div className="flex flex-col gap-y-4 w-full">
       <div className="grid sm:grid-cols-2 items-center gap-x-8 gap-y-4 w-full">
         <div className="flex flex-col gap-y-1">
-          <Heading level="h3" className="text-lg text-neutral-950">
-            Order transfers
-          </Heading>
-          <Text className="text-base-regular text-neutral-500">
-            Can&apos;t find the order you are looking for?
-            <br /> Connect an order to your account.
-          </Text>
+          <h3 className="text-lg">Bestellübertragung</h3>
+          <p className="text-base-regular text-muted-foreground">
+            Finden Sie die Bestellung nicht? Verbinden Sie eine Bestellung mit Ihrem Konto.
+          </p>
         </div>
         <form
           action={formAction}
           className="flex flex-col gap-y-1 sm:items-end"
         >
           <div className="flex flex-col gap-y-2 w-full">
-            <Input className="w-full" name="order_id" placeholder="Order ID" />
+            <Input className="w-full" name="order_id" placeholder="Bestell-ID" />
             <SubmitButton
               variant="secondary"
               className="w-fit whitespace-nowrap self-end"
             >
-              Request transfer
+              Übertragung anfordern
             </SubmitButton>
           </div>
         </form>
       </div>
       {!state.success && state.error && (
-        <Text className="text-base-regular text-rose-500 text-right">
+        <p className="text-base-regular text-rose-500 text-right">
           {state.error}
-        </Text>
+        </p>
       )}
       {showSuccess && (
-        <div className="flex justify-between p-4 bg-neutral-50 shadow-borders-base w-full self-stretch items-center">
+        <div className="flex justify-between p-4 bg-muted shadow-sm w-full self-stretch items-center rounded-md">
           <div className="flex gap-x-2 items-center">
             <CheckCircleMiniSolid className="w-4 h-4 text-emerald-500" />
             <div className="flex flex-col gap-y-1">
-              <Text className="text-medim-pl text-neutral-950">
-                Transfer for order {state.order?.id} requested
-              </Text>
-              <Text className="text-base-regular text-neutral-600">
-                Transfer request email sent to {state.order?.email}
-              </Text>
+              <span className="text-base-semi">
+                Übertragung für Bestellung {state.order?.id} angefordert
+              </span>
+              <span className="text-base-regular text-muted-foreground">
+                Bestätigungs-E-Mail gesendet an {state.order?.email}
+              </span>
             </div>
           </div>
-          <IconButton
-            variant="transparent"
-            className="h-fit"
-            onClick={() => setShowSuccess(false)}
-          >
-            <XCircleSolid className="w-4 h-4 text-neutral-500" />
-          </IconButton>
+          <Button variant="ghost" size="icon" className="h-fit" onClick={() => setShowSuccess(false)}>
+            <XCircleSolid className="w-4 h-4 text-muted-foreground" />
+          </Button>
         </div>
       )}
     </div>

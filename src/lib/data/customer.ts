@@ -375,3 +375,48 @@ export const updateCustomerAddress = async (
       return { success: false, error: err.toString() }
     })
 }
+
+export async function deleteCustomerAccount(): Promise<{ success: boolean; error?: string | null }> {
+  try {
+    const headers = {
+      ...(await getAuthHeaders()),
+    }
+
+    // Attempt to delete the currently authenticated customer via store endpoint
+    const response = await sdk.client.fetch(`/store/customers/me`, {
+      method: "DELETE",
+      headers,
+    })
+
+    // The Medusa client may return an object or throw; if it returns an object, check for errors
+    if (response && typeof response === "object" && (response as any).error) {
+      const err = (response as any).error
+      return { success: false, error: err?.message || JSON.stringify(err) }
+    }
+
+    // Clear client-side auth state
+    await removeAuthToken()
+    await removeCartId()
+
+    const customerCacheTag = await getCacheTag("customers")
+    revalidateTag(customerCacheTag)
+
+    const cartCacheTag = await getCacheTag("carts")
+    revalidateTag(cartCacheTag)
+
+    return { success: true, error: null }
+  } catch (err: any) {
+    // Attempt to surface useful error information
+    if (err?.response) {
+      try {
+        const text = await err.response.text()
+        return { success: false, error: `Response error: ${text}` }
+      } catch (_) {
+        return { success: false, error: `Response status: ${err.response.status}` }
+      }
+    }
+
+    const message = err?.message || err?.toString() || "Unknown error"
+    return { success: false, error: message }
+  }
+}

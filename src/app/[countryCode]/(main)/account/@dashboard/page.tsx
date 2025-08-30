@@ -6,8 +6,8 @@ import { retrieveCustomer } from "@lib/data/customer"
 import { listOrders } from "@lib/data/orders"
 
 export const metadata: Metadata = {
-  title: "Account",
-  description: "Overview of your account activity.",
+  title: "Kontoübersicht",
+  description: "Übersicht über Ihre Kontoaktivitäten.",
 }
 
 export default async function OverviewTemplate() {
@@ -18,5 +18,9 @@ export default async function OverviewTemplate() {
     notFound()
   }
 
-  return <Overview customer={customer} orders={orders} />
+  return (
+    <>
+      <Overview customer={customer} orders={orders} />
+    </>
+  )
 }

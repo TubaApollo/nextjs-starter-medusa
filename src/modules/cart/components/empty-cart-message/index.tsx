@@ -1,22 +1,25 @@
+import LocalizedClientLink from "@modules/common/components/localized-client-link"
 import { Button } from "@lib/components/ui/button"
-import InteractiveLink from "@modules/common/components/interactive-link"
+import { CardTitle, CardDescription } from "@lib/components/ui/card"
+import { ShoppingBag } from "lucide-react"
 
 const EmptyCartMessage = () => {
   return (
-    <div className="py-16 px-4 flex flex-col justify-center items-center text-center space-y-6" data-testid="empty-cart-message">
-      <div className="space-y-2">
-        <h1 className="text-3xl font-bold text-gray-900">Ihr Warenkorb ist leer</h1>
-        <p className="text-gray-600 max-w-md">
-          Sie haben noch keine Produkte in Ihrem Warenkorb. Lassen Sie uns das ändern!
-        </p>
+    <>
+      <div className="w-16 h-16 bg-muted rounded-full flex items-center justify-center mb-4">
+        <ShoppingBag className="h-8 w-8 text-muted-foreground" />
       </div>
-      
-      <InteractiveLink href="/store">
-        <Button className="bg-red-600 hover:bg-red-700 text-white px-8 py-3 text-lg">
+      <CardTitle className="text-xl mb-2">Ihr Warenkorb ist leer</CardTitle>
+      <CardDescription className="mb-6 max-w-md">
+        Fügen Sie Produkte zu Ihrem Warenkorb hinzu, um später zur Kasse zu gehen.
+      </CardDescription>
+      <LocalizedClientLink href="/store">
+        <Button className="gap-2 w-full sm:w-auto" variant="outline">
+          <ShoppingBag className="h-4 w-4" />
           Produkte entdecken
         </Button>
-      </InteractiveLink>
-    </div>
+      </LocalizedClientLink>
+    </>
   )
 }
 

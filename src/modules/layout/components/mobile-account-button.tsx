@@ -7,11 +7,11 @@ export default function MobileAccountButton() {
   return (
     <div className="md:hidden flex items-center">
       <LocalizedClientLink
-        className="hover:text-ui-fg-base flex items-center gap-1"
+        className="flex items-center justify-center h-10 w-10 text-gray-600 hover:text-gray-900"
         href="/account"
         data-testid="nav-account-link"
       >
-        <UserIcon className="w-5 h-5" aria-hidden="true" />
+  <UserIcon className="w-6 h-6" aria-hidden="true" />
       </LocalizedClientLink>
     </div>
   )

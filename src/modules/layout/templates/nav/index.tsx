@@ -17,7 +17,7 @@ export default async function Nav() {
   return (
     <div className="sticky top-0 inset-x-0 z-50 group">
       <header className="relative h-16 mx-auto border-b duration-200 bg-white border-ui-border-base">
-        <nav className="content-container txt-xsmall-plus text-ui-fg-subtle flex items-center justify-between w-full h-full text-small-regular">
+        <nav className="content-container txt-xsmall-plus text-gray-600 flex items-center justify-between w-full h-full text-small-regular">
           {/* Left: Medusa Store and Mobile Burger Menu */}
           <div className="flex-1 basis-0 h-full flex items-center">
             <div className="h-full xl:hidden">
@@ -25,7 +25,7 @@ export default async function Nav() {
             </div>
             <LocalizedClientLink
               href="/"
-              className="txt-compact-xlarge-plus hover:text-ui-fg-base uppercase hidden xl:block"
+              className="txt-compact-xlarge-plus text-gray-600 hover:text-gray-900 uppercase hidden xl:block"
               data-testid="nav-store-link"
             >
               Medusa Store
@@ -43,11 +43,11 @@ export default async function Nav() {
           <div className="flex items-center gap-x-4 h-full flex-1 basis-0 justify-end">
             <div className="hidden md:flex items-center gap-x-6 h-full">
               <LocalizedClientLink
-                className="hover:text-ui-fg-base flex items-center gap-1"
+                className="text-gray-600 hover:text-gray-900 flex items-center gap-1"
                 href="/account"
                 data-testid="nav-account-link"
               >
-                <UserIcon className="w-5 h-5" aria-hidden="true" />
+                <UserIcon className="w-6 h-6" aria-hidden="true" />
                 <span>Kundencenter</span>
               </LocalizedClientLink>
             </div>
@@ -56,7 +56,7 @@ export default async function Nav() {
             <Suspense
               fallback={
                 <LocalizedClientLink
-                  className="hover:text-ui-fg-base flex gap-2"
+                  className="text-gray-600 hover:text-gray-900 flex gap-2"
                   href="/wishlist"
                   data-testid="nav-wishlist-link"
                 >
@@ -69,7 +69,7 @@ export default async function Nav() {
             <Suspense
               fallback={
                 <LocalizedClientLink
-                  className="hover:text-ui-fg-base flex gap-2"
+                  className="text-gray-600 hover:text-gray-900 flex gap-2"
                   href="/cart"
                   data-testid="nav-cart-link"
                 >

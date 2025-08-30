@@ -95,8 +95,8 @@ export default function WishlistTemplate() {
   if (!isAuthenticated && !customerLoading) {
     return (
       <div className="container mx-auto px-4 py-8">
-        <Card className="border-dashed border-2 border-muted-foreground/25 max-w-md mx-auto">
-          <CardContent className="flex flex-col items-center justify-center py-16 text-center">
+  <Card className="border border-muted-foreground/25 max-w-3xl mx-auto">
+          <CardContent className="flex flex-col items-center justify-center py-24 text-center">
             <div className="w-16 h-16 bg-muted rounded-full flex items-center justify-center mb-4">
               <LogIn className="h-8 w-8 text-muted-foreground" />
             </div>
@@ -197,9 +197,9 @@ export default function WishlistTemplate() {
           })}
         </div>
       ) : (
-        /* Empty State */
-        <Card className="border-dashed border-2 border-muted-foreground/25">
-          <CardContent className="flex flex-col items-center justify-center py-16 text-center">
+  /* Empty State */
+  <Card className="border border-muted-foreground/25 max-w-3xl mx-auto">
+          <CardContent className="flex flex-col items-center justify-center py-24 text-center">
             <div className="w-16 h-16 bg-muted rounded-full flex items-center justify-center mb-4">
               <Heart className="h-8 w-8 text-muted-foreground" />
             </div>

@@ -5,6 +5,8 @@ import { Heart, Share2, Trash2, ShoppingBag, Copy, LogIn, Loader2 } from "lucide
 import { usePathname } from "next/navigation"
 import LocalizedClientLink from "@modules/common/components/localized-client-link"
 import Thumbnail from "@modules/products/components/thumbnail"
+import DeleteButton from "@modules/common/components/delete-button"
+import LineItemOptions from "@modules/common/components/line-item-options"
 import { useWishlist } from "@lib/context/wishlist-context"
 import { useCustomer } from "@lib/context/customer-context"
 import { getShareToken } from "@lib/data/wishlist"
@@ -104,21 +106,13 @@ const WishlistDropdown = ({ className }: WishlistDropdownProps) => {
                   (a.created_at ?? "") > (b.created_at ?? "") ? -1 : 1
                 )
                 .map((item) => (
-                  <div
-                    className="flex gap-3 group"
-                    key={item.id}
-                    data-testid="wishlist-item"
-                  >
-                    <LocalizedClientLink
-                      href={`/products/${item.product_variant?.product?.handle || ''}`}
-                      className="flex-shrink-0"
-                    >
-                      <div className="w-16 h-16 bg-muted rounded-md overflow-hidden">
+                  <div key={item.id} className="flex gap-3 group relative">
+                    <LocalizedClientLink href={`/products/${item.product_variant?.product?.handle || ''}`} className="flex-shrink-0 w-24">
+                      <div className="w-24 h-24 bg-muted rounded-md overflow-hidden">
                         <Thumbnail
                           thumbnail={item.product_variant?.product?.thumbnail}
                           images={item.product_variant?.product?.images}
                           size="square"
-                          className="w-full h-full object-cover"
                         />
                       </div>
                     </LocalizedClientLink>
@@ -127,36 +121,24 @@ const WishlistDropdown = ({ className }: WishlistDropdownProps) => {
                       <div className="flex items-start justify-between">
                         <div className="min-w-0 flex-1 mr-2">
                           <h4 className="text-sm font-medium truncate">
-                            <LocalizedClientLink
-                              href={`/products/${item.product_variant?.product?.handle || ''}`}
-                              data-testid="product-link"
-                              className="hover:text-primary"
-                            >
+                            <LocalizedClientLink href={`/products/${item.product_variant?.product?.handle || ''}`} data-testid="product-link" className="hover:text-primary">
                               {item.product_variant?.product?.title || 'Unbekanntes Produkt'}
                             </LocalizedClientLink>
                           </h4>
-                          {item.product_variant?.title && item.product_variant.title !== 'Default Title' && (
-                            <p className="text-xs text-muted-foreground mt-1">
-                              {item.product_variant.title}
-                            </p>
-                          )}
-                          {item.product_variant?.sku && (
-                            <Badge variant="secondary" className="text-xs mt-1">
-                              {item.product_variant.sku}
-                            </Badge>
-                          )}
+                          <LineItemOptions variant={item.product_variant} data-testid="wishlist-item-variant" data-value={item.product_variant} />
+                          <div className="text-xs text-muted-foreground mt-1">SKU: {item.product_variant?.sku || '—'}</div>
                         </div>
 
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => handleRemoveItem(item.id)}
-                          className="opacity-0 group-hover:opacity-100 transition-opacity h-8 w-8 p-0 hover:text-destructive hover:bg-destructive/10"
-                          aria-label="Von Merkliste entfernen"
-                        >
-                          <Trash2 className="h-3 w-3" />
-                        </Button>
+                        <div className="flex items-start justify-end">
+                          {/* wishlist doesn't show a price here; keep space for alignment if needed */}
+                        </div>
                       </div>
+
+                      <div className="mt-2" />
+                    </div>
+
+                    <div className="absolute bottom-2 right-2 z-10">
+                      <DeleteButton id={item.id} onClick={async (id: string) => await handleRemoveItem(id)} className="h-8 w-8 p-0 bg-white/90 hover:bg-white shadow-sm opacity-0 group-hover:opacity-100 transition-opacity" data-testid="wishlist-item-remove-button" />
                     </div>
                   </div>
                 ))}

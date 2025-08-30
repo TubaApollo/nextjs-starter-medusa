@@ -17,12 +17,15 @@ const CartTemplate = ({
     <div className="py-12">
       <div className="content-container" data-testid="cart-container">
         {cart?.items?.length ? (
-          <div className="grid grid-cols-1 lg:grid-cols-[1fr_400px] gap-x-8 gap-y-8">
-            <div className="space-y-6">
+          <div className="grid grid-cols-1 small:grid-cols-[1fr_400px] gap-x-10 gap-y-8">
+            <div className="flex flex-col gap-y-6">
               {!customer && (
-                <SignInPrompt />
+                <Card className="mb-2">
+                  <CardContent className="py-6">
+                    <SignInPrompt />
+                  </CardContent>
+                </Card>
               )}
-              
               <Card>
                 <CardHeader>
                   <CardTitle className="text-2xl font-bold">Warenkorb</CardTitle>
@@ -33,25 +36,30 @@ const CartTemplate = ({
                 </CardContent>
               </Card>
             </div>
-            
-            <div className="lg:sticky lg:top-12 lg:self-start">
-              <Card>
-                <CardHeader>
-                  <CardTitle className="text-xl font-semibold">Zusammenfassung</CardTitle>
-                </CardHeader>
-                <Separator />
-                <CardContent>
-                  <Summary cart={cart as any} />
-                </CardContent>
-              </Card>
+            <div className="relative">
+              <div className="flex flex-col gap-y-8 sticky top-12">
+                {cart && cart.region && (
+                  <Card className="mb-2">
+                    <CardHeader>
+                      <CardTitle className="text-xl font-semibold">Zusammenfassung</CardTitle>
+                    </CardHeader>
+                    <Separator />
+                    <CardContent>
+                      <Summary cart={cart as any} />
+                    </CardContent>
+                  </Card>
+                )}
+              </div>
             </div>
           </div>
         ) : (
-          <Card className="max-w-2xl mx-auto">
-            <CardContent className="p-0">
-              <EmptyCartMessage />
-            </CardContent>
-          </Card>
+          <div className="container mx-auto px-4 py-8">
+            <Card className="border border-muted-foreground/25 max-w-3xl mx-auto">
+              <CardContent className="flex flex-col items-center justify-center py-24 text-center">
+                <EmptyCartMessage />
+              </CardContent>
+            </Card>
+          </div>
         )}
       </div>
     </div>

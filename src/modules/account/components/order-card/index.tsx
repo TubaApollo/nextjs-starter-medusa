@@ -1,4 +1,4 @@
-import { Button } from "@medusajs/ui"
+import { Button } from "@lib/components/ui/button"
 import { useMemo } from "react"
 
 import Thumbnail from "@modules/products/components/thumbnail"
@@ -24,13 +24,13 @@ const OrderCard = ({ order }: OrderCardProps) => {
   }, [order])
 
   return (
-    <div className="bg-white flex flex-col" data-testid="order-card">
+    <div className="bg-card p-4 rounded-md flex flex-col" data-testid="order-card">
       <div className="uppercase text-large-semi mb-1">
         #<span data-testid="order-display-id">{order.display_id}</span>
       </div>
       <div className="flex items-center divide-x divide-gray-200 text-small-regular text-ui-fg-base">
         <span className="pr-2" data-testid="order-created-at">
-          {new Date(order.created_at).toDateString()}
+          {new Date(order.created_at).toLocaleDateString("de-DE", { year: 'numeric', month: 'short', day: 'numeric' })}
         </span>
         <span className="px-2" data-testid="order-amount">
           {convertToLocale({
@@ -39,7 +39,7 @@ const OrderCard = ({ order }: OrderCardProps) => {
           })}
         </span>
         <span className="pl-2">{`${numberOfLines} ${
-          numberOfLines > 1 ? "items" : "item"
+          numberOfLines > 1 ? "Artikel" : "Artikel"
         }`}</span>
       </div>
       <div className="grid grid-cols-2 small:grid-cols-4 gap-4 my-4">
@@ -69,14 +69,14 @@ const OrderCard = ({ order }: OrderCardProps) => {
             <span className="text-small-regular text-ui-fg-base">
               + {numberOfLines - 4}
             </span>
-            <span className="text-small-regular text-ui-fg-base">more</span>
+            <span className="text-small-regular text-ui-fg-base">weitere</span>
           </div>
         )}
       </div>
       <div className="flex justify-end">
         <LocalizedClientLink href={`/account/orders/details/${order.id}`}>
           <Button data-testid="order-details-link" variant="secondary">
-            See details
+            Details ansehen
           </Button>
         </LocalizedClientLink>
       </div>

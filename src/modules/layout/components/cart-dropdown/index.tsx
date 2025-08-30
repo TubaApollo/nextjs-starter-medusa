@@ -12,6 +12,7 @@ import Thumbnail from "@modules/products/components/thumbnail"
 import { usePathname } from "next/navigation"
 import { useEffect, useRef, useState } from "react"
 import { useRouter } from "next/navigation"
+import { ShoppingBag } from "lucide-react"
 import { ShoppingBagIcon } from "@heroicons/react/24/outline"
 
 type CartDropdownProps = {
@@ -94,14 +95,14 @@ const CartDropdown = ({ cart: cartState }: CartDropdownProps) => {
         <PopoverTrigger asChild>
           <button
             aria-label="Warenkorb"
-            className="flex items-center justify-center h-10 w-10 rounded-full hover:bg-accent transition-colors focus:outline-none"
+            className="flex items-center justify-center h-10 w-10 transition-colors text-gray-600 hover:text-gray-900 focus:outline-none"
             onClick={() => router.push('/cart')}
             onMouseEnter={openAndClearTimeout}
             onMouseLeave={scheduleCloseShort}
             data-testid="nav-cart-link"
             style={{ background: 'none', boxShadow: 'none', border: 'none', padding: 0 }}
           >
-            <div className="relative">
+              <div className="relative">
               <ShoppingBagIcon className="w-6 h-6" />
               {totalItems > 0 && (
                 <span className="absolute -top-1 -right-1 badge-count" aria-live="polite">{totalItems}</span>
@@ -119,9 +120,9 @@ const CartDropdown = ({ cart: cartState }: CartDropdownProps) => {
   onMouseEnter={openAndClearTimeout}
   onMouseLeave={scheduleCloseShort}
       >
-        <div className="p-4 flex items-center justify-between border-b">
+          <div className="p-4 flex items-center justify-between border-b">
           <h3 className="font-semibold flex items-center gap-2">
-            <ShoppingBagIcon className="w-4 h-4 text-primary" />
+            <ShoppingBag className="w-4 h-4 text-primary" />
             Warenkorb
           </h3>
         </div>
@@ -135,7 +136,7 @@ const CartDropdown = ({ cart: cartState }: CartDropdownProps) => {
                   .sort((a, b) => (a.created_at ?? "") > (b.created_at ?? "") ? -1 : 1)
                   .map((item) => (
                     // make this a hover group so the delete button can use group-hover
-                    <div key={item.id} className="flex gap-3 group">
+                    <div key={item.id} className="flex gap-3 group relative">
                       <LocalizedClientLink href={`/products/${item.product_handle}`} className="flex-shrink-0 w-24">
                         <div className="w-24 h-24 bg-muted rounded-md overflow-hidden">
                           <Thumbnail thumbnail={item.thumbnail} images={item.variant?.product?.images} size="square" />
@@ -159,10 +160,12 @@ const CartDropdown = ({ cart: cartState }: CartDropdownProps) => {
                           </div>
                         </div>
 
-                        <div className="mt-2">
-                          {/* show delete button (visible) and keep a smooth opacity change on hover */}
-                          <DeleteButton id={item.id} className="mt-1 opacity-100 hover:opacity-80 transition-opacity" data-testid="cart-item-remove-button">Entfernen</DeleteButton>
-                        </div>
+                        <div className="mt-2" />
+                      </div>
+
+                      {/* delete button positioned outside the thumbnail at bottom-right of the item */}
+                      <div className="absolute bottom-2 right-2 z-10">
+                        <DeleteButton id={item.id} className="h-8 w-8 p-0 bg-white/90 hover:bg-white shadow-sm opacity-0 group-hover:opacity-100 transition-opacity" data-testid="cart-item-remove-button" />
                       </div>
                     </div>
                   ))}
@@ -194,7 +197,7 @@ const CartDropdown = ({ cart: cartState }: CartDropdownProps) => {
         ) : (
           <div className="flex py-16 flex-col gap-4 items-center justify-center text-center px-4">
             <div className="w-12 h-12 bg-muted rounded-full flex items-center justify-center">
-              <ShoppingBagIcon className="w-6 h-6 text-muted-foreground" />
+              <ShoppingBag className="w-6 h-6 text-muted-foreground" />
             </div>
 
             <div className="space-y-2">
@@ -203,7 +206,10 @@ const CartDropdown = ({ cart: cartState }: CartDropdownProps) => {
             </div>
 
             <LocalizedClientLink href="/store">
-              <Button className="w-full" variant="outline">Produkte entdecken</Button>
+              <Button className="w-full" variant="outline">
+                <ShoppingBag className="w-4 h-4 mr-2" />
+                Produkte entdecken
+              </Button>
             </LocalizedClientLink>
           </div>
         )}

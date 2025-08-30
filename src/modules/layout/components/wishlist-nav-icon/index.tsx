@@ -44,7 +44,7 @@ export default function WishlistNavIcon({ initialTotal }: { initialTotal?: numbe
           <button
             aria-label="Merkliste"
             data-testid="nav-wishlist-link"
-            className="flex items-center justify-center h-10 w-10 rounded-full hover:bg-accent transition-colors"
+            className="flex items-center justify-center h-10 w-10 transition-colors text-gray-600 hover:text-gray-900"
             onClick={() => router.push('/wishlist')}
             onMouseEnter={() => {
               setOpen(true)
@@ -61,7 +61,7 @@ export default function WishlistNavIcon({ initialTotal }: { initialTotal?: numbe
               {totalItems > 0 ? (
                 <HeartSolid className="w-6 h-6 text-red-600 transition-transform" />
               ) : (
-                <HeartOutline className="w-6 h-6 text-ui-fg-subtle transition-transform" />
+                <HeartOutline className="w-6 h-6 transition-transform" />
               )}
 
                 {typeof displayTotal === "number" && displayTotal > 0 && (

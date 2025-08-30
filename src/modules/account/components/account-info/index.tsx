@@ -1,5 +1,6 @@
 import { Disclosure } from "@headlessui/react"
-import { Badge, Button, clx } from "@medusajs/ui"
+import { Badge, clx } from "@medusajs/ui"
+import { Button } from "@lib/components/ui/button"
 import { useEffect } from "react"
 
 import useToggleState from "@lib/hooks/use-toggle-state"
@@ -22,7 +23,7 @@ const AccountInfo = ({
   isSuccess,
   isError,
   clearState,
-  errorMessage = "An error occurred, please try again",
+  errorMessage = "Ein Fehler ist aufgetreten. Bitte versuchen Sie es erneut.",
   children,
   'data-testid': dataTestid
 }: AccountInfoProps) => {
@@ -43,10 +44,10 @@ const AccountInfo = ({
 
   return (
     <div className="text-small-regular" data-testid={dataTestid}>
-      <div className="flex items-end justify-between">
+      <div className="flex items-center justify-between">
         <div className="flex flex-col">
           <span className="uppercase text-ui-fg-base">{label}</span>
-          <div className="flex items-center flex-1 basis-0 justify-end gap-x-4">
+          <div className="mt-1">
             {typeof currentInfo === "string" ? (
               <span className="font-semibold" data-testid="current-info">{currentInfo}</span>
             ) : (
@@ -54,16 +55,17 @@ const AccountInfo = ({
             )}
           </div>
         </div>
-        <div>
+        <div className="ml-4">
           <Button
             variant="secondary"
-            className="w-[100px] min-h-[25px] py-1"
+            size="sm"
+            className="min-w-[100px] py-1"
             onClick={handleToggle}
             type={state ? "reset" : "button"}
             data-testid="edit-button"
             data-active={state}
           >
-            {state ? "Cancel" : "Edit"}
+            {state ? "Abbrechen" : "Bearbeiten"}
           </Button>
         </div>
       </div>
@@ -75,14 +77,14 @@ const AccountInfo = ({
           className={clx(
             "transition-[max-height,opacity] duration-300 ease-in-out overflow-hidden",
             {
-              "max-h-[1000px] opacity-100": isSuccess,
-              "max-h-0 opacity-0": !isSuccess,
+              "max-h-[1000px] opacity-100 pointer-events-auto": isSuccess,
+              "max-h-0 opacity-0 pointer-events-none": !isSuccess,
             }
           )}
           data-testid="success-message"
         >
           <Badge className="p-2 my-4" color="green">
-            <span>{label} updated succesfully</span>
+            <span>{label} erfolgreich aktualisiert</span>
           </Badge>
         </Disclosure.Panel>
       </Disclosure>
@@ -94,8 +96,8 @@ const AccountInfo = ({
           className={clx(
             "transition-[max-height,opacity] duration-300 ease-in-out overflow-hidden",
             {
-              "max-h-[1000px] opacity-100": isError,
-              "max-h-0 opacity-0": !isError,
+              "max-h-[1000px] opacity-100 pointer-events-auto": isError,
+              "max-h-0 opacity-0 pointer-events-none": !isError,
             }
           )}
           data-testid="error-message"
@@ -112,8 +114,8 @@ const AccountInfo = ({
           className={clx(
             "transition-[max-height,opacity] duration-300 ease-in-out overflow-visible",
             {
-              "max-h-[1000px] opacity-100": state,
-              "max-h-0 opacity-0": !state,
+              "max-h-[1000px] opacity-100 pointer-events-auto": state,
+              "max-h-0 opacity-0 pointer-events-none": !state,
             }
           )}
         >
@@ -121,12 +123,13 @@ const AccountInfo = ({
             <div>{children}</div>
             <div className="flex items-center justify-end mt-2">
               <Button
-                isLoading={pending}
+                disabled={pending}
+                size="sm"
                 className="w-full small:max-w-[140px]"
                 type="submit"
                 data-testid="save-button"
               >
-                Save changes
+                {pending ? "Speichert..." : "Speichern"}
               </Button>
             </div>
           </div>
