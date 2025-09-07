@@ -4,6 +4,7 @@ import { useState } from "react"
 import { Heart, Share2, Trash2, ShoppingBag, Copy, Check, LogIn } from "lucide-react"
 import LocalizedClientLink from "@modules/common/components/localized-client-link"
 import Thumbnail from "@modules/products/components/thumbnail"
+import { useParams } from "next/navigation"
 import { useWishlist } from "@lib/context/wishlist-context"
 import { useCustomer } from "@lib/context/customer-context"
 import { getShareToken } from "@lib/data/wishlist"
@@ -23,6 +24,7 @@ import { AspectRatio } from "@lib/components/ui/aspect-ratio"
 export default function WishlistTemplate() {
   const { wishlist, removeItem, totalItems, isLoading } = useWishlist()
   const { isAuthenticated, isLoading: customerLoading } = useCustomer()
+  const params = useParams() as { countryCode?: string }
   const [shareUrl, setShareUrl] = useState<string | null>(null)
   const [isSharing, setIsSharing] = useState(false)
   const [copySuccess, setCopySuccess] = useState(false)
@@ -38,7 +40,8 @@ export default function WishlistTemplate() {
     try {
       const token = await getShareToken()
       if (token) {
-        const url = `${window.location.origin}/wishlist/${token.token}`
+  const prefix = params?.countryCode ? `/${params.countryCode}` : ""
+  const url = `${window.location.origin}${prefix}/wishlist/${token.token}`
         setShareUrl(url)
         
         // Copy to clipboard
@@ -166,32 +169,58 @@ export default function WishlistTemplate() {
           {wishlist.items.map((item) => {
             const variant = item.product_variant
             const product = variant?.product as any
+            const priceInfo = variant ? getPricesForVariant(variant) : null
 
             return (
-              <div key={item.id} className="group">
-                <div className="relative">
-                  {/* Use the site's product card for consistent UI. ProductPreview expects a `region` prop;
-                      we pass a safe cast because ProductPreview doesn't currently require region at runtime.
-                      If you want proper region-aware pricing, we can fetch region server-side later. */}
-                  <ProductPreview product={product} region={{} as any} />
+              <div
+                key={item.id}
+                className="group relative bg-white border border-ui-border-base rounded-lg overflow-hidden shadow-sm hover:shadow-md transition-shadow"
+              >
+                <LocalizedClientLink href={`/products/${product?.handle || ''}`} className="block">
+                  <div className="aspect-square p-4">
+                    <Thumbnail
+                      thumbnail={product?.thumbnail}
+                      images={product?.images}
+                      size="full"
+                      className="w-full h-full object-contain"
+                    />
+                  </div>
 
-                  {/* Remove button positioned over the card */}
-                  <Button
-                    variant="secondary"
-                    size="sm"
-                    onClick={() => handleRemoveItem(item.id)}
-                    className="absolute top-2 right-2 z-10 h-8 w-8 p-0 bg-white/90 hover:bg-white shadow-sm opacity-0 group-hover:opacity-100 transition-opacity"
-                    aria-label="Von Merkliste entfernen"
-                  >
-                    <Trash2 className="h-4 w-4 text-red-500" />
-                  </Button>
-                </div>
+                  <div className="p-4 pt-0">
+                    <h3 className="font-semibold mb-1 line-clamp-2">{product?.title || 'Unbekanntes Produkt'}</h3>
 
-                {/* Added date row separate from the card - cleaner two-line layout */}
-                <div className="mt-2 text-xs text-muted-foreground">
-                  <div className="text-[11px]">Hinzugefügt am</div>
-                  <div className="text-sm font-medium mt-1">{new Date(item.created_at).toLocaleDateString('de-DE')}</div>
-                </div>
+                    {variant?.title && variant.title !== 'Default Title' && (
+                      <div className="text-sm text-muted-foreground mb-2">{variant.title}</div>
+                    )}
+
+                    {variant?.sku && (
+                      <div className="mb-2">
+                        <span className="text-xs text-gray-600 font-mono bg-gray-50 px-1.5 py-0.5 rounded">SKU: {variant.sku}</span>
+                      </div>
+                    )}
+
+                    {priceInfo && (
+                      <div className="mb-2">
+                        <PreviewPrice price={priceInfo} />
+                        <span className="text-xs text-muted-foreground ml-1">pro St.</span>
+                      </div>
+                    )}
+
+                    <div className="flex items-center justify-between">
+                      <div className="text-sm text-muted-foreground">Hinzugefügt am {new Date(item.created_at).toLocaleDateString('de-DE')}</div>
+                    </div>
+                  </div>
+                </LocalizedClientLink>
+
+                <Button
+                  variant="secondary"
+                  size="sm"
+                  onClick={() => handleRemoveItem(item.id)}
+                  className="absolute top-2 right-2 z-10 h-8 w-8 p-0 bg-white/90 hover:bg-white shadow-sm opacity-0 group-hover:opacity-100 transition-opacity"
+                  aria-label="Von Merkliste entfernen"
+                >
+                  <Trash2 className="h-4 w-4 text-red-500" />
+                </Button>
               </div>
             )
           })}

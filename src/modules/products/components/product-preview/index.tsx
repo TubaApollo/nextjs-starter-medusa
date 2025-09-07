@@ -1,15 +1,14 @@
+"use client"
+
 import { Text } from "@medusajs/ui"
 import { getProductPrice } from "@lib/util/get-product-price"
 import { HttpTypes } from "@medusajs/types"
 import LocalizedClientLink from "@modules/common/components/localized-client-link"
-import Thumbnail from "../thumbnail"
 import PreviewPrice from "./price"
 import AddToCartButton from "@modules/products/components/add-to-cart-button"
 import WishlistButton from "@modules/common/components/wishlist-button"
-import { ArrowsRightLeftIcon } from "@heroicons/react/24/outline"
-import { Inter } from "next/font/google"
-
-const inter = Inter({ subsets: ["latin"], display: "swap" })
+import { ArrowsRightLeftIcon, CheckCircleIcon, ExclamationTriangleIcon, XCircleIcon, ChevronDownIcon } from "@heroicons/react/24/outline"
+import { useState } from "react"
 
 export default function ProductPreview({
   product,
@@ -20,127 +19,156 @@ export default function ProductPreview({
   isFeatured?: boolean
   region: HttpTypes.StoreRegion
 }) {
+  const variants = (product.variants as any[]) || []
+  const [selectedVariant, setSelectedVariant] = useState(variants[0] || null)
+
   const { cheapestPrice } = getProductPrice({
     product,
   })
 
-  // Determine stock status (Auf Lager / Nicht auf Lager)
-  const hasInventory = (() => {
-    const variants = product.variants || []
-    if (variants.length === 0) return true // be optimistic if no data
-    // If any variant allows backorder or manage_inventory is false, treat as in stock
-    if (variants.some((v: any) => v?.allow_backorder)) return true
-    if (variants.some((v: any) => v?.manage_inventory === false)) return true
-    // If inventory fields are not present, avoid false negatives
-    if (!variants.some((v: any) => typeof v?.inventory_quantity === "number")) return true
-    // Else check any variant qty > 0
-    return variants.some((v: any) => (v?.inventory_quantity as number) > 0)
-  })()
+  // Get stock status for selected variant
+  const getVariantStockStatus = (variant: any) => {
+    if (!variant) return { status: "out_of_stock", quantity: 0 }
+    
+    if (variant?.allow_backorder) return { status: "in_stock", quantity: null }
+    if (variant?.manage_inventory === false) return { status: "in_stock", quantity: null }
+    
+    const quantity = variant?.inventory_quantity
+    if (typeof quantity !== "number") return { status: "in_stock", quantity: null }
+    
+    if (quantity <= 0) return { status: "out_of_stock", quantity: 0 }
+    if (quantity <= 5) return { status: "low_stock", quantity }
+    return { status: "in_stock", quantity }
+  }
+
+  const stockInfo = getVariantStockStatus(selectedVariant)
+
+  const getStockDisplay = () => {
+    switch (stockInfo.status) {
+      case "in_stock":
+        return {
+          text: "Auf Lager",
+          icon: <CheckCircleIcon className="w-4 h-4" />,
+          color: "text-green-600",
+          bgColor: "bg-green-50"
+        }
+      case "low_stock":
+        return {
+          text: "Wenige verfügbar",
+          icon: <ExclamationTriangleIcon className="w-4 h-4" />,
+          color: "text-orange-600",
+          bgColor: "bg-orange-50"
+        }
+      default:
+        return {
+          text: "Nicht verfügbar",
+          icon: <XCircleIcon className="w-4 h-4" />,
+          color: "text-red-600",
+          bgColor: "bg-red-50"
+        }
+    }
+  }
+
+  const stockDisplay = getStockDisplay()
 
   return (
-    <div
-      className={`group h-full flex flex-col rounded-lg border border-ui-border-base bg-white shadow-sm hover:shadow-md transition-shadow overflow-hidden ${inter.className}`}
-      data-testid="product-wrapper"
-    >
-      {/* Clickable area: image + main info */}
-      <LocalizedClientLink href={`/products/${product.handle}`} className="block flex-1">
-        <Thumbnail
-          thumbnail={product.thumbnail}
-          images={product.images}
-          size="full"
-          isFeatured
-          className="p-2 sm:p-3 bg-transparent shadow-none rounded-none aspect-[1/1] sm:aspect-[11/14]"
-        />
-        <div className="p-2.5 sm:p-3 flex-1 flex flex-col">
-          <div className="mb-0.5">
-            <Text
-              className="text-ui-fg-base font-semibold leading-snug line-clamp-2 text-[13px] sm:text-sm"
-              data-testid="product-title"
-            >
-              {product.title}
-            </Text>
-          </div>
-
-          {/* SKU display */}
-          {(() => {
-            const first = Array.isArray(product.variants) && product.variants.length > 0 ? (product.variants[0] as any) : null
-            const sku = first?.sku || ""
-            return sku ? (
-              <div className="mt-0.5 mb-1">
-                <span className="text-[10px] sm:text-xs text-gray-600 font-mono bg-gray-50 px-1.5 py-0.5 rounded">
-                  SKU: {sku}
-                </span>
-              </div>
-            ) : null
-          })()}
-          {/* Reserve consistent height for variants hint */}
-          <div className="hidden sm:block h-4">
-            {Array.isArray(product.variants) && product.variants.length > 1 ? (
-              <p className="text-ui-fg-subtle text-[11px]">Mehrere Varianten vorhanden</p>
-            ) : null}
-          </div>
-
-          {/* Price row with fixed height to align cards */}
-          <div className="flex items-baseline justify-between mt-1.5 min-h-[28px] sm:min-h-[32px]">
-            {cheapestPrice && (
-              <div className="flex items-baseline gap-1">
-                {/* Price without any prefix like 'nur' */}
-                <span className="text-base sm:text-lg font-bold text-ui-fg-base">
-                  <PreviewPrice price={cheapestPrice} />
-                </span>
-              </div>
-            )}
-            <span className="text-[10px] sm:text-[11px] text-ui-fg-subtle">pro St.</span>
-          </div>
-
-          {/* Delivery row with fixed height for alignment */}
-          <div className="mt-1 text-[11px] sm:text-[12px] min-h-[18px] sm:min-h-[20px]">
-            <span className="text-ui-fg-subtle">Lieferzeit: </span>
-            <span className={hasInventory ? "text-green-700" : "text-red-600"}>
-              {hasInventory ? "Auf Lager" : "Nicht auf Lager"}
-            </span>
-          </div>
+    <div className="max-w-sm bg-white border border-gray-200 rounded-lg shadow-sm hover:shadow-lg transition-all duration-200 overflow-hidden">
+      {/* Product Image with overlays */}
+      <div className="relative bg-gradient-to-br from-gray-50 to-gray-100 p-4">
+        <LocalizedClientLink href={`/products/${product.handle}`} className="block">
+          <img
+            src={product.thumbnail || product.images?.[0]?.url || "/api/placeholder/300/300"}
+            alt={product.title}
+            className="w-full h-40 object-contain hover:scale-105 transition-transform duration-200"
+          />
+        </LocalizedClientLink>
+        
+        {/* Stock Badge */}
+        <div className={`absolute top-2 left-2 px-2 py-1 rounded-full text-xs font-medium ${stockDisplay.bgColor} ${stockDisplay.color} flex items-center gap-1 shadow-sm`}>
+          {stockDisplay.icon}
+          {stockDisplay.text}
         </div>
-      </LocalizedClientLink>
 
-      {/* Bottom actions (not links) */}
-      <div className="px-2.5 sm:px-3 pb-2.5 sm:pb-3 mt-auto">
-        <div className="mt-1.5 flex items-center gap-4 text-[12px] text-ui-fg-subtle">
-          <button
-            type="button"
-            className="inline-flex items-center gap-2 hover:text-ui-fg-base transition-colors"
-            aria-label="Vergleichen"
-          >
-            <ArrowsRightLeftIcon className="h-4 w-4" />
-            <span className="hidden sm:inline">Vergleichen</span>
-          </button>
-          {Array.isArray(product.variants) && product.variants.length > 0 && (() => {
-            const firstVariant = product.variants[0] as any
-            return (
-              <WishlistButton
-                variantId={firstVariant?.id}
-                productHandle={product.handle}
-                size="md"
-              />
-            )
-          })()}
-        </div>
-        {/* Add to cart */}
-        {Array.isArray(product.variants) && product.variants.length > 0 && (
-          (() => {
-            const variants = product.variants as any[]
-            const inStock = variants.find((v) =>
-              typeof v?.inventory_quantity === "number" ? (v.inventory_quantity as number) > 0 : true
-            )
-            const selectedVariant = (inStock || variants[0]) as any
-            const isDisabled = !selectedVariant || (typeof selectedVariant?.inventory_quantity === "number" && selectedVariant.inventory_quantity < 1)
-            return (
-              <div className="mt-2">
-                <AddToCartButton variant={selectedVariant} disabled={isDisabled} className="w-full" />
-              </div>
-            )
-          })()
+        {/* Wishlist Button */}
+        {selectedVariant && (
+          <div className="absolute top-2 right-2">
+            <WishlistButton
+              variantId={selectedVariant.id}
+              productHandle={product.handle}
+              size="sm"
+              className="p-2 rounded-full bg-white/90 backdrop-blur-sm text-gray-600 hover:text-red-500 hover:bg-white shadow-sm transition-all duration-200"
+            />
+          </div>
         )}
+      </div>
+
+      {/* Product Info */}
+      <div className="p-4">
+        {/* Product Name */}
+        <LocalizedClientLink href={`/products/${product.handle}`} className="block">
+          <h3 className="text-base font-semibold text-gray-900 mb-2 line-clamp-2 hover:text-gray-700 transition-colors">
+            {product.title}
+          </h3>
+        </LocalizedClientLink>
+
+        {/* SKU */}
+        {selectedVariant?.sku && (
+          <p className="text-xs text-gray-500 mb-3">
+            SKU: <span className="font-mono bg-gray-100 px-1.5 py-0.5 rounded">{selectedVariant.sku}</span>
+          </p>
+        )}
+
+        {/* Modern Variants Selector */}
+        {variants.length > 1 && (
+          <div className="mb-4">
+            <label className="block text-xs font-medium text-gray-700 mb-1">Variante:</label>
+            <div className="relative">
+              <select 
+                value={selectedVariant?.id || ""} 
+                onChange={(e) => {
+                  const variant = variants.find(v => v.id === e.target.value)
+                  setSelectedVariant(variant)
+                }}
+                className="w-full pl-3 pr-8 py-2 text-sm border border-gray-300 rounded-lg bg-white focus:ring-2 focus:ring-gray-500 focus:border-gray-500 appearance-none cursor-pointer transition-colors"
+              >
+                {variants.map((variant: any) => (
+                  <option key={variant.id} value={variant.id}>
+                    {variant.title || `Variante ${variants.indexOf(variant) + 1}`}
+                  </option>
+                ))}
+              </select>
+              <ChevronDownIcon className="absolute right-2 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
+            </div>
+          </div>
+        )}
+
+        {/* Pricing */}
+        <div className="mb-4">
+          {cheapestPrice && (
+            <div className="flex items-baseline justify-between">
+              <PreviewPrice price={cheapestPrice} region={region} />
+              <span className="text-xs text-gray-500 font-medium">pro Stk.</span>
+            </div>
+          )}
+        </div>
+
+        {/* Action Buttons */}
+        <div className="space-y-3">
+          {/* Add to Cart Button */}
+          {selectedVariant && (
+            <AddToCartButton 
+              variant={selectedVariant} 
+              disabled={stockInfo.status === "out_of_stock"} 
+              className="w-full py-2.5 px-4 bg-gray-900 hover:bg-gray-800 disabled:bg-gray-400 disabled:cursor-not-allowed text-white text-sm font-medium rounded-lg transition-all duration-200 flex items-center justify-center gap-2 shadow-sm hover:shadow-md" 
+            />
+          )}
+
+          {/* Compare Button */}
+          <button className="w-full py-2 px-3 border border-gray-300 text-gray-700 text-sm rounded-lg hover:bg-gray-50 hover:border-gray-400 flex items-center justify-center gap-2 transition-all duration-200">
+            <ArrowsRightLeftIcon className="w-4 h-4" />
+            Vergleichen
+          </button>
+        </div>
       </div>
     </div>
   )

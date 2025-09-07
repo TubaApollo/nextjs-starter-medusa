@@ -9,14 +9,16 @@ import { Bars3Icon } from "@heroicons/react/24/outline"
 import LocalizedClientLink from "@modules/common/components/localized-client-link"
 import CountrySelect from "../country-select"
 import { HttpTypes } from "@medusajs/types"
+import { UserIcon, HeartIcon } from "@heroicons/react/24/outline"
 
-const SideMenuItems = {
-  Home: "/",
-  Store: "/store",
-  Search: "/search",
-  Account: "/account",
-  Cart: "/cart",
-}
+const SideMenuItems = [
+  { name: "Home", href: "/", icon: null },
+  { name: "Store", href: "/store", icon: null },
+  { name: "Suche", href: "/search", icon: null },
+  { name: "Kundencenter", href: "/account", icon: UserIcon },
+  { name: "Wunschzettel", href: "/wishlist", icon: HeartIcon },
+  { name: "Warenkorb", href: "/cart", icon: null },
+]
 
 const SideMenu = ({ regions }: { regions: HttpTypes.StoreRegion[] | null }) => {
   const toggleState = useToggleState()
@@ -57,18 +59,22 @@ const SideMenu = ({ regions }: { regions: HttpTypes.StoreRegion[] | null }) => {
                       </button>
                     </div>
                     <ul className="flex flex-col gap-6 items-start justify-start">
-                      {Object.entries(SideMenuItems).map(([name, href]) => (
-                        <li key={name}>
-                          <LocalizedClientLink
-                            href={href}
-                            className="text-3xl leading-10 hover:text-ui-fg-disabled"
-                            onClick={close}
-                            data-testid={`${name.toLowerCase()}-link`}
-                          >
-                            {name}
-                          </LocalizedClientLink>
-                        </li>
-                      ))}
+                      {SideMenuItems.map((item) => {
+                        const IconComponent = item.icon
+                        return (
+                          <li key={item.name}>
+                            <LocalizedClientLink
+                              href={item.href}
+                              className="text-3xl leading-10 hover:text-ui-fg-disabled flex items-center gap-3"
+                              onClick={close}
+                              data-testid={`${item.name.toLowerCase()}-link`}
+                            >
+                              {IconComponent && <IconComponent className="w-8 h-8" />}
+                              {item.name}
+                            </LocalizedClientLink>
+                          </li>
+                        )
+                      })}
                     </ul>
                     <div className="flex flex-col gap-y-6">
                       <div
@@ -90,7 +96,7 @@ const SideMenu = ({ regions }: { regions: HttpTypes.StoreRegion[] | null }) => {
                         />
                       </div>
                       <Text className="flex justify-between txt-compact-small">
-                        © {new Date().getFullYear()} Medusa Store. All rights
+                        © {new Date().getFullYear()} Kreckler. All rights
                         reserved.
                       </Text>
                     </div>

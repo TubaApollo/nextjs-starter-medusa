@@ -1,5 +1,5 @@
 import { HttpTypes } from "@medusajs/types"
-import { Table, Text } from "@medusajs/ui"
+import { Text } from "@medusajs/ui"
 
 import LineItemOptions from "@modules/common/components/line-item-options"
 import LineItemPrice from "@modules/common/components/line-item-price"
@@ -13,44 +13,34 @@ type ItemProps = {
 
 const Item = ({ item, currencyCode }: ItemProps) => {
   return (
-    <Table.Row className="w-full" data-testid="product-row">
-      <Table.Cell className="!pl-0 p-4 w-24">
-        <div className="flex w-16">
+    <div className="flex items-center gap-4 w-full" data-testid="product-row">
+      <div className="flex-shrink-0">
+        <div className="w-20 h-20 rounded-md overflow-hidden bg-muted">
           <Thumbnail thumbnail={item.thumbnail} size="square" />
         </div>
-      </Table.Cell>
+      </div>
 
-      <Table.Cell className="text-left">
-        <Text
-          className="txt-medium-plus text-ui-fg-base"
-          data-testid="product-name"
-        >
+      <div className="flex-1 min-w-0">
+        <Text className="txt-medium-plus text-ui-fg-base truncate" data-testid="product-name">
           {item.product_title}
         </Text>
-        <LineItemOptions variant={item.variant} data-testid="product-variant" />
-      </Table.Cell>
+        <div className="text-sm text-ui-fg-subtle mt-1">
+          <LineItemOptions variant={item.variant} data-testid="product-variant" />
+        </div>
+      </div>
 
-      <Table.Cell className="!pr-0">
-        <span className="!pr-0 flex flex-col items-end h-full justify-center">
-          <span className="flex gap-x-1 ">
-            <Text className="text-ui-fg-muted">
-              <span data-testid="product-quantity">{item.quantity}</span>x{" "}
-            </Text>
-            <LineItemUnitPrice
-              item={item}
-              style="tight"
-              currencyCode={currencyCode}
-            />
-          </span>
-
-          <LineItemPrice
-            item={item}
-            style="tight"
-            currencyCode={currencyCode}
-          />
-        </span>
-      </Table.Cell>
-    </Table.Row>
+      <div className="flex flex-col items-end gap-1">
+        <div className="flex items-baseline gap-2">
+          <Text className="text-ui-fg-muted mr-1">
+            <span data-testid="product-quantity">{item.quantity}</span>x
+          </Text>
+          <LineItemUnitPrice item={item} style="tight" currencyCode={currencyCode} />
+        </div>
+        <div>
+          <LineItemPrice item={item} style="tight" currencyCode={currencyCode} />
+        </div>
+      </div>
+    </div>
   )
 }
 

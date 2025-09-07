@@ -9,10 +9,12 @@ import { HeartIcon as HeartOutline } from "@heroicons/react/24/outline"
 import { HeartIcon as HeartSolid } from "@heroicons/react/24/solid"
 import { useEffect, useRef, useState } from "react"
 import { useRouter } from "next/navigation"
+import { useParams } from "next/navigation"
 
 export default function WishlistNavIcon({ initialTotal }: { initialTotal?: number }) {
   const { totalItems } = useWishlist()
   const router = useRouter()
+  const params = useParams() as { countryCode?: string }
 
   // Show server-provided initial total until client context provides a value
   const [displayTotal, setDisplayTotal] = useState<number | undefined>(initialTotal)
@@ -45,7 +47,7 @@ export default function WishlistNavIcon({ initialTotal }: { initialTotal?: numbe
             aria-label="Merkliste"
             data-testid="nav-wishlist-link"
             className="flex items-center justify-center h-10 w-10 transition-colors text-gray-600 hover:text-gray-900"
-            onClick={() => router.push('/wishlist')}
+            onClick={() => router.push(params?.countryCode ? `/${params.countryCode}/wishlist` : '/wishlist')}
             onMouseEnter={() => {
               setOpen(true)
               if (autoCloseTimer.current) clearTimeout(autoCloseTimer.current)
@@ -54,14 +56,19 @@ export default function WishlistNavIcon({ initialTotal }: { initialTotal?: numbe
               if (autoCloseTimer.current) clearTimeout(autoCloseTimer.current)
               autoCloseTimer.current = setTimeout(() => setOpen(false), 200)
             }}
+            onWheel={() => {
+              // keep open when user scrolls over the trigger
+              if (autoCloseTimer.current) clearTimeout(autoCloseTimer.current)
+              setOpen(true)
+            }}
           >
             <span className="sr-only">Merkliste</span>
             <div className="relative">
               {/* Simplified: render icon without framer-motion to avoid SSR hydration issues */}
               {totalItems > 0 ? (
-                <HeartSolid className="w-6 h-6 text-red-600 transition-transform" />
+                <HeartSolid className="w-7 h-7 text-red-600 transition-transform" />
               ) : (
-                <HeartOutline className="w-6 h-6 transition-transform" />
+                <HeartOutline className="w-7 h-7 transition-transform" />
               )}
 
                 {typeof displayTotal === "number" && displayTotal > 0 && (
@@ -83,6 +90,11 @@ export default function WishlistNavIcon({ initialTotal }: { initialTotal?: numbe
         onMouseLeave={() => {
           if (autoCloseTimer.current) clearTimeout(autoCloseTimer.current)
           autoCloseTimer.current = setTimeout(() => setOpen(false), 200)
+        }}
+        onWheel={() => {
+          // keep open when user scrolls inside the popover
+          if (autoCloseTimer.current) clearTimeout(autoCloseTimer.current)
+          setOpen(true)
         }}
       >
         <WishlistDropdown />

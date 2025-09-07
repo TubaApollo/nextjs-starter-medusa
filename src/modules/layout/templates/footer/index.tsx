@@ -1,14 +1,12 @@
 import { listCategories } from "@lib/data/categories"
 import { listCollections } from "@lib/data/collections"
 import { Text, clx } from "@medusajs/ui"
-import { listRegions } from "@lib/data/regions"
 import { HttpTypes } from "@medusajs/types"
 
 import LocalizedClientLink from "@modules/common/components/localized-client-link"
 import Facebook from "@modules/common/icons/facebook"
 import Instagram from "@modules/common/icons/instagram"
 import Twitter from "@modules/common/icons/twitter"
-import FooterRegionSelector from "./region-selector"
 import { CookiePreferencesButton } from "@modules/cookieconsent/CookiePreferencesButton"
 
 export default async function Footer() {
@@ -16,9 +14,6 @@ export default async function Footer() {
     fields: "*products",
   })
   const productCategories = await listCategories()
-  const regions = await listRegions().then(
-    (regions: HttpTypes.StoreRegion[]) => regions
-  )
 
   return (
     <footer className="border-t border-ui-border-base w-full">
@@ -29,7 +24,7 @@ export default async function Footer() {
               href="/"
               className="txt-compact-xlarge-plus text-ui-fg-subtle hover:text-ui-fg-base uppercase"
             >
-              Medusa Store
+              Kreckler
             </LocalizedClientLink>
           </div>
           <div className="text-small-regular gap-10 md:gap-x-16 grid grid-cols-2 sm:grid-cols-3">
@@ -155,9 +150,6 @@ export default async function Footer() {
         </div>
 
 
-        {/* Region Selector */}
-        <FooterRegionSelector regions={regions} />
-
         {/* Cookie Preferences Button */}
         <div className="mb-4">
           <CookiePreferencesButton />
@@ -165,7 +157,7 @@ export default async function Footer() {
         
         <div className="flex w-full mb-16 justify-between text-ui-fg-muted">
           <Text className="txt-compact-small">
-            © {new Date().getFullYear()} Medusa Store. All rights reserved.
+            © {new Date().getFullYear()} Kreckler. All rights reserved.
           </Text>
           <div className="flex gap-x-4">
             <a

@@ -180,13 +180,13 @@ const SearchWrapperClient = () => {
                 />
                 <AnimatePresence>
                   {showDesktopResults && !isSearchPage && (
-                    <div className="fixed inset-x-0 top-16 z-50 flex justify-center" ref={inputWrapperRef}>
+                    <div className="fixed inset-x-0 top-[120px] z-50 flex justify-center" ref={inputWrapperRef}>
                       <motion.div
                         initial={{ opacity: 0, y: -10 }}
                         animate={{ opacity: 1, y: 0 }}
                         exit={{ opacity: 0, y: -10 }}
                         transition={{ duration: 0.2 }}
-                        className="bg-white border border-gray-200 rounded-xl shadow-xl max-h-[32rem] overflow-hidden mt-2 search-dropdown-content"
+                        className="bg-white border-2 border-gray-200 rounded-lg shadow-2xl max-h-[32rem] overflow-hidden mt-3 search-dropdown-content"
                         style={{ width: '56rem', maxWidth: '90vw' }}
                       >
                         <div 
@@ -195,7 +195,7 @@ const SearchWrapperClient = () => {
                           <div className={`grid gap-12 ${hasProductHits && hasCategoryHits ? 'grid-cols-1 lg:grid-cols-2' : 'grid-cols-1'}`}> 
                             {/* Products Column */}
                             <div className={`${!hasProductHits ? 'hidden' : ''} ${hasProductHits && !hasCategoryHits ? 'lg:col-span-2' : ''}`}>
-                              <h3 className="text-sm font-semibold text-gray-700 mb-3">Products</h3>
+                              <h3 className="text-sm font-bold text-gray-800 mb-4 uppercase tracking-wide border-b border-red-100 pb-2">Produkte</h3>
                               <Configure hitsPerPage={12} />
                               <CustomHits 
                                 hitComponent={({ hit }) => (
@@ -215,7 +215,7 @@ const SearchWrapperClient = () => {
                             {/* Categories Column */}
                             <Index indexName={CATEGORY_INDEX_NAME}>
                               <div className={`${!hasCategoryHits ? 'hidden' : ''} ${hasCategoryHits && !hasProductHits ? 'lg:col-span-2' : ''}`}>
-                                <h3 className="text-sm font-semibold text-gray-700 mb-3">Categories</h3>
+                                <h3 className="text-sm font-bold text-gray-800 mb-4 uppercase tracking-wide border-b border-red-100 pb-2">Kategorien</h3>
                                 <Configure hitsPerPage={10} />
                                 <CustomHits 
                                   hitComponent={({ hit }) => (
@@ -259,9 +259,8 @@ const SearchWrapperClient = () => {
                   exit={{ opacity: 0 }}
                   transition={{ duration: 0.2 }}
                   className="fixed inset-0 z-50 bg-white overflow-y-auto search-dropdown-scroll"
-                  style={{ top: '60px' }}
                 >
-                  <div className="p-4">
+                  <div className="p-4 pt-16">
                     <div className="mb-4 flex items-center gap-3">
                       <div className="flex-1">
                         <SearchInput 
@@ -386,9 +385,9 @@ const SearchInput = ({ query, setQuery, onFocus, onBlur, onSubmit, inputRef }: {
 
   return (
     <form onSubmit={onSubmit} className="relative">
-      <div className="absolute left-3 top-1/2 -translate-y-1/2">
-        <svg className="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+      <div className="absolute left-4 top-1/2 -translate-y-1/2 z-10">
+        <svg className="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
         </svg>
       </div>
       
@@ -399,8 +398,8 @@ const SearchInput = ({ query, setQuery, onFocus, onBlur, onSubmit, inputRef }: {
         onChange={handleInputChange}
         onFocus={onFocus}
         onBlur={onBlur}
-        placeholder="Produkte durchsuchen..."
-        className="w-full py-3 pl-10 pr-12 text-gray-700 bg-white border border-gray-300 rounded-full focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-transparent placeholder-gray-400 transition-all duration-200"
+        placeholder="Regale, Lagerausstattung, Industrielösungen..."
+        className="w-full py-3.5 pl-12 pr-14 text-gray-800 bg-gray-50 border border-gray-300 rounded-lg focus:outline-none focus:ring-1 focus:ring-red-400 focus:border-red-400 placeholder-gray-500 transition-all duration-300 font-medium shadow-inner hover:border-gray-400 hover:bg-white"
         autoComplete="off"
         autoCorrect="off"
         autoCapitalize="off"
@@ -411,15 +410,15 @@ const SearchInput = ({ query, setQuery, onFocus, onBlur, onSubmit, inputRef }: {
       />
       
       {query && (
-        <div className="absolute right-3 top-1/2 -translate-y-1/2">
+        <div className="absolute right-4 top-1/2 -translate-y-1/2">
           <button
             type="button"
             onClick={handleClear}
-            className="p-1 text-gray-400 hover:text-gray-600 transition-colors rounded-full hover:bg-gray-100"
+            className="p-1.5 text-gray-500 hover:text-red-600 transition-colors rounded-full hover:bg-red-50 focus:outline-none focus:ring-2 focus:ring-red-200"
             aria-label="Suche löschen"
           >
-            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M6 18L18 6M6 6l12 12" />
             </svg>
           </button>
         </div>

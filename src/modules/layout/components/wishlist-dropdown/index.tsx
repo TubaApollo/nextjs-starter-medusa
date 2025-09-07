@@ -3,6 +3,7 @@
 import { Fragment, useRef, useState } from "react"
 import { Heart, Share2, Trash2, ShoppingBag, Copy, LogIn, Loader2 } from "lucide-react"
 import { usePathname } from "next/navigation"
+import { useParams } from "next/navigation"
 import LocalizedClientLink from "@modules/common/components/localized-client-link"
 import Thumbnail from "@modules/products/components/thumbnail"
 import DeleteButton from "@modules/common/components/delete-button"
@@ -15,7 +16,7 @@ import { getShareToken } from "@lib/data/wishlist"
 import { Button } from "@lib/components/ui/button"
 import { Badge } from "@lib/components/ui/badge"
 import { Separator } from "@lib/components/ui/separator"
-import { ScrollArea } from "@lib/components/ui/scroll-area"
+// using native overflow for reliable scroll in popovers
 import { Alert, AlertDescription } from "@lib/components/ui/alert"
 
 interface WishlistDropdownProps {
@@ -31,6 +32,7 @@ const WishlistDropdown = ({ className }: WishlistDropdownProps) => {
   const { wishlist, removeItem, totalItems } = useWishlist()
   const { isAuthenticated } = useCustomer()
   const pathname = usePathname()
+  const params = useParams() as { countryCode?: string }
   const previousTotalItems = useRef(totalItems)
 
   const handleRemoveItem = async (itemId: string) => {
@@ -44,7 +46,8 @@ const WishlistDropdown = ({ className }: WishlistDropdownProps) => {
     try {
       const token = await getShareToken()
       if (token) {
-        const url = `${window.location.origin}/wishlist/${token.token}`
+  const prefix = params?.countryCode ? `/${params.countryCode}` : ""
+  const url = `${window.location.origin}${prefix}/wishlist/${token.token}`
         setShareUrl(url)
         
         // Copy to clipboard
@@ -98,7 +101,7 @@ const WishlistDropdown = ({ className }: WishlistDropdownProps) => {
 
       {wishlist && wishlist.items?.length ? (
         <>
-          <ScrollArea className="max-h-[400px]">
+          <div className="overflow-y-auto max-h-[400px] search-dropdown-scroll scrollbar-thin">
             <div className="p-4 space-y-4">
               {wishlist.items
                 .slice() // create a shallow copy before sorting
@@ -143,7 +146,7 @@ const WishlistDropdown = ({ className }: WishlistDropdownProps) => {
                   </div>
                 ))}
             </div>
-          </ScrollArea>
+          </div>
 
           <div className="p-4 border-t space-y-3">
             <div className="flex items-center justify-between text-sm">

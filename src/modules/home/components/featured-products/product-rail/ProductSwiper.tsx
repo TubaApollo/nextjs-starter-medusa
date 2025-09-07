@@ -1,9 +1,10 @@
 "use client"
 
-import React from "react"
+import React, { useRef } from "react"
 import { Swiper, SwiperSlide } from "swiper/react"
 import { Navigation, Pagination, A11y } from "swiper/modules"
 import { motion } from "framer-motion"
+import type { Swiper as SwiperType } from 'swiper'
 
 // Swiper styles (needed once in the app bundle)
 import "swiper/css"
@@ -15,22 +16,51 @@ interface ProductSwiperProps {
 }
 
 export default function ProductSwiper({ children }: ProductSwiperProps) {
+  const swiperRef = useRef<SwiperType | null>(null)
+
+  const handlePrevSlide = () => {
+    swiperRef.current?.slidePrev()
+  }
+
+  const handleNextSlide = () => {
+    swiperRef.current?.slideNext()
+  }
   return (
     <div className="relative w-full product-rail">
-      {/* Edge fades for nicer mobile swiping */}
-      <div className="pointer-events-none absolute inset-y-0 left-0 w-8 sm:w-0 bg-gradient-to-r from-white to-transparent z-10" />
-      <div className="pointer-events-none absolute inset-y-0 right-0 w-8 sm:w-0 bg-gradient-to-l from-white to-transparent z-10" />
+      {/* Navigation container for top-right positioning */}
+      <div className="absolute top-0 right-0 z-20 flex gap-2 -mt-16">
+        <button 
+          onClick={handlePrevSlide}
+          className="flex items-center justify-center w-9 h-9 bg-white border border-gray-200 rounded-lg shadow-sm hover:shadow-md hover:border-gray-300 transition-all duration-200 text-gray-600 hover:text-gray-800"
+          aria-label="Previous slide"
+        >
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <path d="m15 18-6-6 6-6"/>
+          </svg>
+        </button>
+        <button 
+          onClick={handleNextSlide}
+          className="flex items-center justify-center w-9 h-9 bg-white border border-gray-200 rounded-lg shadow-sm hover:shadow-md hover:border-gray-300 transition-all duration-200 text-gray-600 hover:text-gray-800"
+          aria-label="Next slide"
+        >
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <path d="m9 18 6-6-6-6"/>
+          </svg>
+        </button>
+      </div>
+
+      {/* Edge fades for nicer mobile swiping - only on mobile */}
+      <div className="pointer-events-none absolute inset-y-0 left-0 w-6 sm:w-0 bg-gradient-to-r from-white to-transparent z-10" />
+      <div className="pointer-events-none absolute inset-y-0 right-0 w-6 sm:w-0 bg-gradient-to-l from-white to-transparent z-10" />
 
       <Swiper
+        onSwiper={(swiper) => (swiperRef.current = swiper)}
         modules={[Navigation, Pagination, A11y]}
-        centeredSlides={true}
-        centerInsufficientSlides={true}
-        slidesPerView={1.05}
+        centeredSlides={false}
+        centerInsufficientSlides={false}
+        slidesPerView={1.2}
         spaceBetween={16}
-        navigation={{
-          enabled: true,
-          hideOnClick: false,
-        }}
+        navigation={false}
         pagination={{
           clickable: true,
           dynamicBullets: false,
@@ -49,7 +79,8 @@ export default function ProductSwiper({ children }: ProductSwiperProps) {
             spaceBetween: 24,
           },
         }}
-        className="!px-4 sm:!px-0 product-rail pb-12"
+        className="product-rail pb-12"
+        style={{ padding: '8px' }} // Add padding to prevent shadow clipping
       >
         {React.Children.map(children, (child, idx) => (
           <SwiperSlide key={idx} className="!h-auto">
@@ -70,48 +101,33 @@ export default function ProductSwiper({ children }: ProductSwiperProps) {
         /* Container adjustments */
         .product-rail {
           position: relative;
-          padding: 0 16px !important;
-          margin: 0 -16px !important;
-          width: calc(100% + 32px) !important;
+          padding: 8px !important;
+          margin: -8px !important;
+          width: calc(100% + 16px) !important;
         }
-
-        /* Navigation buttons - visible on all devices */
+        
+        /* Swiper wrapper adjustments */
+        .swiper-wrapper {
+          align-items: stretch !important;
+        }
+        
+        /* Mobile-specific centering */
+        @media (max-width: 639px) {
+          .product-rail .swiper {
+            padding: 0 16px !important;
+          }
+        }
+        
+        /* Hide default navigation buttons since we use custom ones */
         .swiper-button-prev,
         .swiper-button-next {
-          display: flex !important;
-          width: 28px !important;
-          height: 28px !important;
-          background: rgba(255, 255, 255, 0.95) !important;
-          backdrop-filter: blur(4px) !important;
-          border-radius: 50% !important;
-          border: 1px solid rgba(229, 231, 235, 0.8) !important;
-          box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1) !important;
-          color: #dc2626 !important;
-          margin-top: 0 !important;
-          transform: translateY(-50%) !important;
-          transition: all 0.2s ease !important;
-          z-index: 10 !important;
-        }
-        
-        .swiper-button-prev:hover,
-        .swiper-button-next:hover {
-          background: #fff !important;
-          transform: translateY(-50%) scale(1.1) !important;
-          box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15) !important;
-        }
-        
-        .swiper-button-prev {
-          left: 4px !important;
-        }
-        
-        .swiper-button-next {
-          right: 4px !important;
+          display: none !important;
         }
         
         .swiper-button-prev:after,
         .swiper-button-next:after {
-          font-size: 12px !important;
-          font-weight: 800 !important;
+          font-size: 10px !important;
+          font-weight: 600 !important;
         }
         
         /* Pagination styling */

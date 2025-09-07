@@ -56,7 +56,7 @@ const LoginTemplate = () => {
   const [currentView, setCurrentView] = useState("sign-in")
 
   return (
-    <div className="w-full flex justify-center px-8 py-8 min-h-[600px]">
+    <div className="w-full flex justify-center px-4 sm:px-6 md:px-8 py-8 min-h-[600px]">
       <motion.div
         initial={{ opacity: 0, y: 40 }}
         animate={{ opacity: 1, y: 0 }}

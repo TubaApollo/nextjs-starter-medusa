@@ -163,7 +163,7 @@ module.exports = {
   			lg: '0 10px 15px rgba(0, 0, 0, 0.1)',
   			xl: '0 20px 25px rgba(0, 0, 0, 0.1)'
   		},
-  		keyframes: {
+		keyframes: {
   			ring: {
   				'0%': {
   					transform: 'rotate(0deg)'

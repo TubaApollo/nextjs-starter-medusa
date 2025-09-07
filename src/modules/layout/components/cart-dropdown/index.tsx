@@ -1,6 +1,7 @@
 "use client"
 
 import { Popover, PopoverTrigger, PopoverContent } from "@lib/components/ui/popover"
+// using native overflow for reliable scroll in popovers
 import { convertToLocale } from "@lib/util/money"
 import { HttpTypes } from "@medusajs/types"
 import { Button } from "@lib/components/ui/button"
@@ -92,18 +93,22 @@ const CartDropdown = ({ cart: cartState }: CartDropdownProps) => {
   return (
     <Popover open={cartDropdownOpen} onOpenChange={setCartDropdownOpen}>
       <div className="relative flex items-center justify-center h-12 w-12 group">
-        <PopoverTrigger asChild>
+          <PopoverTrigger asChild>
           <button
             aria-label="Warenkorb"
             className="flex items-center justify-center h-10 w-10 transition-colors text-gray-600 hover:text-gray-900 focus:outline-none"
             onClick={() => router.push('/cart')}
             onMouseEnter={openAndClearTimeout}
             onMouseLeave={scheduleCloseShort}
+            onWheel={() => {
+              if (autoCloseRef.current) clearTimeout(autoCloseRef.current)
+              setCartDropdownOpen(true)
+            }}
             data-testid="nav-cart-link"
             style={{ background: 'none', boxShadow: 'none', border: 'none', padding: 0 }}
           >
               <div className="relative">
-              <ShoppingBagIcon className="w-6 h-6" />
+              <ShoppingBagIcon className="w-7 h-7" />
               {totalItems > 0 && (
                 <span className="absolute -top-1 -right-1 badge-count" aria-live="polite">{totalItems}</span>
               )}
@@ -119,6 +124,10 @@ const CartDropdown = ({ cart: cartState }: CartDropdownProps) => {
         data-testid="nav-cart-dropdown"
   onMouseEnter={openAndClearTimeout}
   onMouseLeave={scheduleCloseShort}
+  onWheel={() => {
+    if (autoCloseRef.current) clearTimeout(autoCloseRef.current)
+    setCartDropdownOpen(true)
+  }}
       >
           <div className="p-4 flex items-center justify-between border-b">
           <h3 className="font-semibold flex items-center gap-2">
@@ -129,8 +138,8 @@ const CartDropdown = ({ cart: cartState }: CartDropdownProps) => {
 
         {cartState && cartState.items?.length ? (
           <>
-            <div className="p-4 overflow-y-auto max-h-[420px]">
-              <div className="space-y-4">
+            <div className="overflow-y-auto max-h-[400px] search-dropdown-scroll scrollbar-thin">
+              <div className="p-4 space-y-4">
                 {cartState.items
                   .slice()
                   .sort((a, b) => (a.created_at ?? "") > (b.created_at ?? "") ? -1 : 1)

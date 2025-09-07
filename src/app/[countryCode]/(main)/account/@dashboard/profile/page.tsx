@@ -33,20 +33,20 @@ export default async function Profile() {
       </div>
       <div className="flex flex-col gap-y-8 w-full">
         <ProfileName customer={customer} />
-        <Divider />
+        <PageDivider />
         <ProfileEmail customer={customer} />
-        <Divider />
+        <PageDivider />
         <ProfilePhone customer={customer} />
-        <Divider />
+        <PageDivider />
         {/* <ProfilePassword customer={customer} />
-        <Divider /> */}
+        <PageDivider /> */}
         <ProfileBillingAddress customer={customer} regions={regions} />
       </div>
     </div>
   )
 }
 
-const Divider = () => {
+const PageDivider = () => {
   return <div className="w-full h-px bg-gray-200" />
 }
 ;``

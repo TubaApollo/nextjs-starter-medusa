@@ -1,7 +1,7 @@
 import { Metadata } from "next"
 
 import OrderOverview from "@modules/account/components/order-overview"
-import { notFound } from "next/navigation"
+import { notFound, unauthorized } from "next/navigation"
 import { listOrders } from "@lib/data/orders"
 import Divider from "@modules/common/components/divider"
 import TransferRequestForm from "@modules/account/components/transfer-request-form"
@@ -13,9 +13,18 @@ export const metadata: Metadata = {
 }
 
 export default async function Orders() {
-  const orders = await listOrders()
+  let orders = null
 
-  if (!orders) {
+  try {
+    orders = await listOrders()
+  } catch (err: any) {
+    const msg = err?.message?.toLowerCase?.() || ""
+    if (msg.includes("unauthorized")) {
+      // Signal Next to render the 401/unauthorized UI
+      unauthorized()
+    }
+
+    // For other errors, treat as not found
     notFound()
   }
 

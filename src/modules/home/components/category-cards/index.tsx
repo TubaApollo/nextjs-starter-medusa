@@ -3,69 +3,85 @@ import React from "react"
 import { useRouter, useParams } from "next/navigation"
 import Image from "next/image"
 import { HttpTypes } from "@medusajs/types"
-import { motion } from "framer-motion"
-import { ArrowRightIcon } from "@heroicons/react/24/outline"
+import { 
+  WrenchScrewdriverIcon,
+  CogIcon,
+  BuildingStorefrontIcon,
+  TruckIcon,
+  HomeIcon,
+  BeakerIcon,
+  BoltIcon,
+  CubeIcon
+} from "@heroicons/react/24/outline"
 
 // Die Komponente akzeptiert weiterhin `categories` als Prop
 interface CategoryGridProps {
   categories: HttpTypes.StoreProductCategory[]
 }
 
-// Using Heroicons instead of inline SVG for consistency
+// Icon mapping for different categories
+const getCategoryIcon = (categoryName: string) => {
+  const name = categoryName.toLowerCase()
+  if (name.includes('hebe') || name.includes('verlegetechnik')) return WrenchScrewdriverIcon
+  if (name.includes('bau') || name.includes('transport')) return TruckIcon
+  if (name.includes('garten') || name.includes('landschaft')) return HomeIcon
+  if (name.includes('bauheizer') || name.includes('lüfter')) return BoltIcon
+  if (name.includes('diamant') || name.includes('bohr') || name.includes('schneid')) return CogIcon
+  if (name.includes('mess')) return BeakerIcon
+  if (name.includes('verdichtung')) return CogIcon
+  if (name.includes('beleuchtung')) return BoltIcon
+  if (name.includes('misch')) return BeakerIcon
+  if (name.includes('absperr')) return WrenchScrewdriverIcon
+  if (name.includes('werkstatt')) return CubeIcon
+  if (name.includes('pumpen')) return CogIcon
+  return BuildingStorefrontIcon
+}
 
-// Karten-Komponente mit verbessertem Design
+// Moderne Kategorie-Karte im Industrial Design - Horizontal Layout
 const CategoryCard: React.FC<{ category: HttpTypes.StoreProductCategory }> = ({ category }) => {
   const router = useRouter()
   const params = useParams() as { countryCode?: string }
   const cc = (params?.countryCode || "") as string
   const thumbnailUrl = category.metadata?.thumbnail as string | undefined
+  const IconComponent = getCategoryIcon(category.name)
   
   return (
     <div
       onClick={() => router.push(cc ? `/${cc}/categories/${category.handle}` : `/categories/${category.handle}`)}
-      className="group relative h-full w-full cursor-pointer overflow-hidden rounded-xl shadow-lg hover:shadow-xl transition-shadow duration-300"
+      className="bg-white border border-gray-200 rounded-lg p-4 cursor-pointer hover:shadow-md transition-shadow duration-300 hover:border-gray-300"
     >
-      {/* Hintergrundbild mit subtilem Zoom-Effekt */}
-      {thumbnailUrl && (
-        <Image
-          src={thumbnailUrl}
-          alt={category.name}
-          fill
-          sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 25vw"
-          className="object-cover transition-transform duration-500 ease-out group-hover:scale-105"
-        />
-      )}
-      
-      {/* Gradient Overlay für bessere Lesbarkeit */}
-      <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/10 to-transparent transition-opacity duration-300"></div>
-      
-      {/* Inhalt */}
-      <div className="absolute inset-0 flex flex-col justify-end p-4 sm:p-6 lg:p-8 text-white">
-        <div>
-          <h3 className="mb-2 text-lg sm:text-xl font-bold leading-tight lg:text-2xl">
+      <div className="flex items-center space-x-4">
+        {/* Image/Icon Container - Left Side */}
+        <div className="flex-shrink-0">
+          {thumbnailUrl ? (
+            <div className="relative w-12 h-12 rounded-lg overflow-hidden bg-gray-100">
+              <Image
+                src={thumbnailUrl}
+                alt={category.name}
+                fill
+                sizes="48px"
+                className="object-cover"
+              />
+            </div>
+          ) : (
+            <div className="w-12 h-12 bg-gray-100 rounded-lg flex items-center justify-center">
+              <IconComponent className="w-6 h-6 text-gray-600" />
+            </div>
+          )}
+        </div>
+        
+        {/* Category Name - Right Side */}
+        <div className="flex-1 min-w-0">
+          <h3 className="text-sm font-medium text-gray-900 truncate">
             {category.name}
           </h3>
-          
-          {category.description && (
-            <p className="mb-3 sm:mb-4 text-xs sm:text-sm text-gray-200 opacity-80 line-clamp-2 lg:text-base">
-              {category.description}
-            </p>
-          )}
-          
-          {/* CTA - immer sichtbar */}
-          <div className="flex items-center space-x-2 group/cta">
-            <span className="text-xs sm:text-sm font-medium">
-              Jetzt entdecken
-            </span>
-            <ArrowRightIcon className="h-4 w-4 transition-transform duration-300 group-hover/cta:translate-x-1" />
-          </div>
         </div>
       </div>
     </div>
   )
 }
 
-// Grid-Komponente mit verbessertem Layout
+// Grid-Komponente mit Industrial Design
 const CategoryGrid: React.FC<CategoryGridProps> = ({ categories }) => {
   if (!categories || categories.length === 0) {
     return (
@@ -79,43 +95,55 @@ const CategoryGrid: React.FC<CategoryGridProps> = ({ categories }) => {
   }
 
   return (
-    <section className="w-full bg-gray-50 py-12 sm:py-16 md:py-20">
-      <div className="mx-auto w-full px-4 sm:px-6 lg:px-8">
+    <section className="w-full bg-white py-8 sm:py-12">
+      <div className="content-container">
         
-        {/* Modern Section Divider */}
-        <div className="mb-10 sm:mb-14 md:mb-16 flex items-center justify-center">
-          <div className="hidden sm:block flex-1 h-px bg-gradient-to-r from-transparent via-gray-300 to-gray-400"></div>
-          <div className="px-4 sm:px-8 text-center">
-            <h2 className="text-xl sm:text-2xl font-bold text-gray-900 lg:text-3xl leading-snug">
-              Unsere Top-Kategorien
+        {/* Section Header - Left aligned with divider */}
+        <div className="mb-4 small:mb-6">
+          <div>
+            <h2 className="txt-xlarge font-bold tracking-tight text-slate-900">
+              UNSERE TOP KATEGORIEN
             </h2>
-            {/* Mobile-only subtle divider */}
-            <div className="mt-3 h-px w-16 mx-auto bg-gray-300/60 sm:hidden" />
+            <div className="mt-1 h-1 w-16 bg-gradient-to-r from-red-600 to-red-400 rounded-full" />
           </div>
-          <div className="hidden sm:block flex-1 h-px bg-gradient-to-l from-transparent via-gray-300 to-gray-400"></div>
         </div>
 
-        {/* Grid mit 4 quadratischen Spalten - volle Breite */}
-        <div className="grid grid-cols-1 gap-3 sm:gap-4 md:grid-cols-2 lg:grid-cols-4 lg:gap-6">
-          {categories.slice(0, 4).map((category, index) => (
-            <motion.div
-              key={category.id}
-              className="aspect-square w-full"
-              initial={{ opacity: 0, scale: 0.9 }}
-              whileInView={{ opacity: 1, scale: 1 }}
-              viewport={{ once: true }}
-              transition={{ 
-                duration: 0.5, 
-                delay: index * 0.1,
-                ease: "easeOut"
-              }}
-            >
+        {/* Category Grid - 5 columns layout */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
+          {categories.slice(0, 15).map((category, index) => (
+            <div key={category.id}>
               <CategoryCard category={category} />
-            </motion.div>
+            </div>
           ))}
         </div>
+
+        {/* View All Categories Button */}
+        {categories.length > 15 && (
+          <ViewAllButton />
+        )}
       </div>
     </section>
+  )
+}
+
+// Separate component for the button to use hooks properly
+const ViewAllButton: React.FC = () => {
+  const router = useRouter()
+  const params = useParams() as { countryCode?: string }
+  const cc = (params?.countryCode || "") as string
+
+  return (
+    <div className="text-center mt-8">
+      <button
+        className="inline-flex items-center px-6 py-2 bg-gray-100 text-gray-700 font-medium rounded-lg hover:bg-gray-200 transition-colors duration-300"
+        onClick={() => router.push(cc ? `/${cc}/categories` : `/categories`)}
+      >
+        Alle Kategorien anzeigen
+        <svg className="w-4 h-4 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+        </svg>
+      </button>
+    </div>
   )
 }
 

@@ -7,7 +7,7 @@ export const getPricesForVariant = (variant: any) => {
     return null
   }
 
-  return {
+  const baseData = {
     calculated_price_number: variant.calculated_price.calculated_amount,
     calculated_price: convertToLocale({
       amount: variant.calculated_price.calculated_amount,
@@ -25,6 +25,18 @@ export const getPricesForVariant = (variant: any) => {
       variant.calculated_price.calculated_amount
     ),
   }
+
+  // Add tax information if available from Medusa 2.0
+  const taxAmount = variant.calculated_price.tax_amount || variant.calculated_price.calculated_price?.tax_amount
+  if (taxAmount) {
+    return {
+      ...baseData,
+      tax_amount: taxAmount,
+      net_amount: variant.calculated_price.calculated_amount - taxAmount,
+    }
+  }
+
+  return baseData
 }
 
 export function getProductPrice({

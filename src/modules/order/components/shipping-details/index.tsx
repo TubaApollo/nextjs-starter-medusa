@@ -9,52 +9,52 @@ type ShippingDetailsProps = {
 }
 
 const ShippingDetails = ({ order }: ShippingDetailsProps) => {
+  const addr = (order.shipping_address || {}) as any
+
   return (
     <div>
       <Heading level="h2" className="flex flex-row text-3xl-regular my-6">
-        Delivery
+        Lieferung
       </Heading>
-      <div className="flex items-start gap-x-8">
+      <div className="flex flex-col gap-6">
         <div
-          className="flex flex-col w-1/3"
+          className="flex flex-col min-w-0"
           data-testid="shipping-address-summary"
         >
           <Text className="txt-medium-plus text-ui-fg-base mb-1">
-            Shipping Address
+            Lieferadresse
           </Text>
           <Text className="txt-medium text-ui-fg-subtle">
-            {order.shipping_address?.first_name}{" "}
-            {order.shipping_address?.last_name}
+            {addr.first_name} {addr.last_name}
+          </Text>
+          {addr.address_1 ? (
+            <Text className="txt-medium text-ui-fg-subtle">{addr.address_1}</Text>
+          ) : null}
+          {addr.address_2 ? (
+            <Text className="txt-medium text-ui-fg-subtle">{addr.address_2}</Text>
+          ) : null}
+          <Text className="txt-medium text-ui-fg-subtle">
+            {addr.postal_code}{addr.postal_code ? ", " : ""}{addr.city}
           </Text>
           <Text className="txt-medium text-ui-fg-subtle">
-            {order.shipping_address?.address_1}{" "}
-            {order.shipping_address?.address_2}
-          </Text>
-          <Text className="txt-medium text-ui-fg-subtle">
-            {order.shipping_address?.postal_code},{" "}
-            {order.shipping_address?.city}
-          </Text>
-          <Text className="txt-medium text-ui-fg-subtle">
-            {order.shipping_address?.country_code?.toUpperCase()}
+            {addr.country_code?.toUpperCase()}
           </Text>
         </div>
 
         <div
-          className="flex flex-col w-1/3 "
+          className="flex flex-col min-w-0"
           data-testid="shipping-contact-summary"
         >
-          <Text className="txt-medium-plus text-ui-fg-base mb-1">Contact</Text>
-          <Text className="txt-medium text-ui-fg-subtle">
-            {order.shipping_address?.phone}
-          </Text>
+          <Text className="txt-medium-plus text-ui-fg-base mb-1">Kontakt</Text>
+          <Text className="txt-medium text-ui-fg-subtle">{addr.phone}</Text>
           <Text className="txt-medium text-ui-fg-subtle">{order.email}</Text>
         </div>
 
         <div
-          className="flex flex-col w-1/3"
+          className="flex flex-col min-w-0"
           data-testid="shipping-method-summary"
         >
-          <Text className="txt-medium-plus text-ui-fg-base mb-1">Method</Text>
+          <Text className="txt-medium-plus text-ui-fg-base mb-1">Versandart</Text>
           <Text className="txt-medium text-ui-fg-subtle">
             {(order as any).shipping_methods[0]?.name} (
             {convertToLocale({
@@ -71,3 +71,4 @@ const ShippingDetails = ({ order }: ShippingDetailsProps) => {
 }
 
 export default ShippingDetails
+

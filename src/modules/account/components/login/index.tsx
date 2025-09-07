@@ -168,7 +168,7 @@ const Login = ({ setCurrentView }: Props) => {
         ease: [0.4, 0.0, 0.2, 1],
         delay: 0.1 
       }}
-      className="w-full max-w-md"
+      className="w-full max-w-sm sm:max-w-md"
       data-testid="login-page"
     >
       <motion.div

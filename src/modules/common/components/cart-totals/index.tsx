@@ -35,6 +35,12 @@ const CartTotals: React.FC<CartTotalsProps> = ({ totals }) => {
     items
   } = totals
 
+  // derived values used in the template
+  const gift = gift_card_total ?? 0
+  const shipping = shipping_total ?? shipping_subtotal ?? 0
+  const netTotal = (total ?? 0) - (tax_total ?? 0)
+  const taxes = tax_total ?? 0
+
   const totalItemDiscount = items?.flatMap(i => i.adjustments).reduce((acc, curr) => (curr?.amount || 0) + acc, 0)
   const totalShippingDiscount = shipping_methods?.flatMap(sm => sm.adjustments).reduce((acc, curr) => (curr?.amount || 0) + acc, 0)
 
