@@ -1,189 +1,87 @@
-import { listCategories } from "@lib/data/categories"
-import { listCollections } from "@lib/data/collections"
-import { Text, clx } from "@medusajs/ui"
-import { HttpTypes } from "@medusajs/types"
-
+// categories/collections removed from footer per design update
 import LocalizedClientLink from "@modules/common/components/localized-client-link"
-import Facebook from "@modules/common/icons/facebook"
-import Instagram from "@modules/common/icons/instagram"
-import Twitter from "@modules/common/icons/twitter"
 import { CookiePreferencesButton } from "@modules/cookieconsent/CookiePreferencesButton"
 
 export default async function Footer() {
-  const { collections } = await listCollections({
-    fields: "*products",
-  })
-  const productCategories = await listCategories()
+  // no collections/categories fetched anymore
 
   return (
-    <footer className="border-t border-ui-border-base w-full">
-      <div className="content-container flex flex-col w-full">
-        <div className="flex flex-col gap-y-6 xsmall:flex-row items-start justify-between py-40">
-          <div>
-            <LocalizedClientLink
-              href="/"
-              className="txt-compact-xlarge-plus text-ui-fg-subtle hover:text-ui-fg-base uppercase"
-            >
-              Kreckler
+    <footer className="border-t border-ui-border-base w-full bg-white">
+      <div className="content-container py-24">
+  <div className="grid grid-cols-1 md:grid-cols-3 gap-10">
+          {/* Column 1: Brand + short description + contact */}
+          <div className="space-y-4">
+            <LocalizedClientLink href="/" className="inline-block">
+              <span className="txt-compact-xlarge-plus font-bold uppercase">Kreckler</span>
             </LocalizedClientLink>
+            <p className="text-sm text-muted-foreground max-w-sm">
+              Fachhandel für Regale, Lagerausstattung und industrielle Lösungen. Schnelle Lieferung und zuverlässiger Kundenservice.
+            </p>
+
+            <div className="space-y-1 text-sm">
+              <div className="flex items-center gap-2">
+                <span className="font-medium">Telefon:</span>
+                <a href="tel:+4900000000000" className="text-sm hover:text-ui-fg-base">+49 (0)000 000 0000</a>
+              </div>
+              <div className="flex items-center gap-2">
+                <span className="font-medium">Email:</span>
+                <a href="mailto:kontakt@example.com" className="text-sm hover:text-ui-fg-base">kontakt@example.com</a>
+              </div>
+              <div className="text-sm text-muted-foreground">MO - FR: 07:30 - 16:30</div>
+            </div>
           </div>
-          <div className="text-small-regular gap-10 md:gap-x-16 grid grid-cols-2 sm:grid-cols-3">
-            {productCategories && productCategories?.length > 0 && (
-              <div className="flex flex-col gap-y-2">
-                <span className="txt-small-plus txt-ui-fg-base">
-                  Categories
-                </span>
-                <ul
-                  className="grid grid-cols-1 gap-2"
-                  data-testid="footer-categories"
-                >
-                  {productCategories?.slice(0, 6).map((c) => {
-                    if (c.parent_category) return null
 
-                    const children =
-                      c.category_children?.map((child) => ({
-                        name: child.name,
-                        handle: child.handle,
-                        id: child.id,
-                      })) || null
+          {/* Column 2: Kundenservice */}
+          <div>
+            <h4 className="font-semibold txt-small-plus mb-3">Kundenservice</h4>
+            <ul className="grid grid-cols-1 gap-2 text-sm text-muted-foreground">
+              <li><LocalizedClientLink href="/faq" className="hover:text-ui-fg-base">FAQ - Häufige Fragen</LocalizedClientLink></li>
+              <li><LocalizedClientLink href="/bestellvorgang" className="hover:text-ui-fg-base">Bestellvorgang</LocalizedClientLink></li>
+              <li><LocalizedClientLink href="/zahlungsarten" className="hover:text-ui-fg-base">Zahlungsarten</LocalizedClientLink></li>
+              <li><LocalizedClientLink href="/lieferung" className="hover:text-ui-fg-base">Lieferung</LocalizedClientLink></li>
+              <li><LocalizedClientLink href="/kontakt" className="hover:text-ui-fg-base">Kontakt</LocalizedClientLink></li>
+            </ul>
+          </div>
 
-                    return (
-                      <li
-                        className="flex flex-col gap-2 text-ui-fg-subtle txt-small"
-                        key={c.id}
-                      >
-                        <LocalizedClientLink
-                          className={clx(
-                            "hover:text-ui-fg-base",
-                            children && "txt-small-plus"
-                          )}
-                          href={`/categories/${c.handle}`}
-                          data-testid="category-link"
-                        >
-                          {c.name}
-                        </LocalizedClientLink>
-                        {children && (
-                          <ul className="grid grid-cols-1 ml-3 gap-2">
-                            {children.map((child) => (
-                              <li key={child.id}>
-                                <LocalizedClientLink
-                                  className="hover:text-ui-fg-base"
-                                  href={`/categories/${child.handle}`}
-                                  data-testid="category-link"
-                                >
-                                  {child.name}
-                                </LocalizedClientLink>
-                              </li>
-                            ))}
-                          </ul>
-                        )}
-                      </li>
-                    )
-                  })}
-                </ul>
+          {/* Column 3 removed (Produkte) */}
+
+          {/* Column 4: Rechtliches + Trust & Payments */}
+          <div className="space-y-4">
+            <h4 className="font-semibold txt-small-plus mb-2">Rechtliches</h4>
+            <ul className="text-sm text-muted-foreground space-y-2 mb-4">
+              <li><LocalizedClientLink href="/impressum" className="hover:text-ui-fg-base">Impressum</LocalizedClientLink></li>
+              <li><LocalizedClientLink href="/agb" className="hover:text-ui-fg-base">AGB</LocalizedClientLink></li>
+              <li><LocalizedClientLink href="/datenschutz" className="hover:text-ui-fg-base">Datenschutz</LocalizedClientLink></li>
+              <li><LocalizedClientLink href="/widerruf" className="hover:text-ui-fg-base">Widerrufsbelehrung</LocalizedClientLink></li>
+            </ul>
+
+            <div className="border rounded-md p-3 bg-gradient-to-b from-white to-gray-50">
+              <div className="flex items-center gap-3">
+                <div className="w-12 h-12 bg-gray-100 rounded flex items-center justify-center">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" className="text-yellow-500"><path d="M12 2l2.9 6.03L21 9.24l-5 3.9L17 21l-5-3.1L7 21l1-7.86-5-3.9 6.1-.21L12 2z" fill="currentColor"/></svg>
+                </div>
+                <div>
+                  <div className="font-medium">Trustpilot</div>
+                  <div className="text-xs text-muted-foreground">Sehr gut — 4.8 / 5</div>
+                </div>
               </div>
-            )}
-            {collections && collections.length > 0 && (
-              <div className="flex flex-col gap-y-2">
-                <span className="txt-small-plus txt-ui-fg-base">
-                  Collections
-                </span>
-                <ul
-                  className={clx(
-                    "grid grid-cols-1 gap-2 text-ui-fg-subtle txt-small",
-                    {
-                      "grid-cols-2": (collections?.length || 0) > 3,
-                    }
-                  )}
-                >
-                  {collections?.slice(0, 6).map((c) => (
-                    <li key={c.id}>
-                      <LocalizedClientLink
-                        className="hover:text-ui-fg-base"
-                        href={`/collections/${c.handle}`}
-                      >
-                        {c.title}
-                      </LocalizedClientLink>
-                    </li>
-                  ))}
-                </ul>
+              <div className="mt-3">
+                <div className="flex gap-2 items-center">
+                  {/* Payment placeholders - replace with real logos if available */}
+                  <div className="w-10 h-6 bg-gray-100 rounded-md flex items-center justify-center text-xs">VISA</div>
+                  <div className="w-10 h-6 bg-gray-100 rounded-md flex items-center justify-center text-xs">MC</div>
+                  <div className="w-10 h-6 bg-gray-100 rounded-md flex items-center justify-center text-xs">PAYPAL</div>
+                  <div className="w-10 h-6 bg-gray-100 rounded-md flex items-center justify-center text-xs">SEPA</div>
+                </div>
               </div>
-            )}
-            <div className="flex flex-col gap-y-2">
-              <span className="txt-small-plus txt-ui-fg-base">Rechtliches</span>
-              <ul className="grid grid-cols-1 gap-y-2 text-ui-fg-subtle txt-small">
-                <li>
-                  <LocalizedClientLink
-                    className="hover:text-ui-fg-base"
-                    href="/impressum"
-                  >
-                    Impressum
-                  </LocalizedClientLink>
-                </li>
-                <li>
-                  <LocalizedClientLink
-                    className="hover:text-ui-fg-base"
-                    href="/datenschutz"
-                  >
-                    Datenschutzerklärung
-                  </LocalizedClientLink>
-                </li>
-                <li>
-                  <LocalizedClientLink
-                    className="hover:text-ui-fg-base"
-                    href="/agb"
-                  >
-                    AGB
-                  </LocalizedClientLink>
-                </li>
-                <li>
-                  <LocalizedClientLink
-                    className="hover:text-ui-fg-base"
-                    href="/widerruf"
-                  >
-                    Widerrufsbelehrung
-                  </LocalizedClientLink>
-                </li>
-              </ul>
             </div>
           </div>
         </div>
 
-
-        {/* Cookie Preferences Button */}
-        <div className="mb-4">
-          <CookiePreferencesButton />
-        </div>
-        
-        <div className="flex w-full mb-16 justify-between text-ui-fg-muted">
-          <Text className="txt-compact-small">
-            © {new Date().getFullYear()} Kreckler. All rights reserved.
-          </Text>
-          <div className="flex gap-x-4">
-            <a
-              href="https://www.facebook.com"
-              target="_blank"
-              rel="noreferrer"
-              className="hover:text-ui-fg-base"
-            >
-              <Facebook />
-            </a>
-            <a
-              href="https://www.instagram.com"
-              target="_blank"
-              rel="noreferrer"
-              className="hover:text-ui-fg-base"
-            >
-              <Instagram />
-            </a>
-            <a
-              href="https://www.twitter.com"
-              target="_blank"
-              rel="noreferrer"
-              className="hover:text-ui-fg-base"
-            >
-              <Twitter />
-            </a>
+        <div className="mt-10 border-t pt-6 flex flex-col md:flex-row items-center justify-between gap-4">
+          <div className="text-sm text-muted-foreground">© {new Date().getFullYear()} Kreckler. Alle Rechte vorbehalten.</div>
+          <div className="flex items-center gap-4">
+            <CookiePreferencesButton />
           </div>
         </div>
       </div>

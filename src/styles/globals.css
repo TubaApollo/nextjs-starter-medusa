@@ -454,6 +454,32 @@
   }
 }
 
+/* Product Swiper specific sizing to avoid image collapse on mobile */
+.product-swiper .swiper-slide {
+  position: relative;
+  height: auto;
+  min-height: 260px;
+}
+
+@media (min-width: 640px) {
+  .product-swiper .swiper-slide {
+    min-height: 360px;
+  }
+}
+
+@media (min-width: 1024px) {
+  .product-swiper .swiper-slide {
+    min-height: 420px;
+  }
+}
+
+/* Ensure slider images render and are not hidden during transitions on mobile */
+.product-swiper img {
+  display: block;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+}
+
 @media (min-width: 1024px) {
   .hero-swiper .swiper-slide {
     height: 100%;
@@ -498,6 +524,101 @@
   background-color: rgba(255, 255, 255, 0.1);
   border: 1px solid rgba(255, 255, 255, 0.2);
 }
+
+/* Embla carousel base styles */
+.embla {
+  position: relative;
+}
+
+.embla__viewport {
+  overflow: hidden;
+  width: 100%;
+  -webkit-overflow-scrolling: touch;
+}
+
+.embla__container {
+  display: flex;
+  align-items: stretch;
+}
+
+.embla__slide {
+  position: relative;
+  min-width: 100%;
+  flex: 0 0 100%;
+  box-sizing: border-box;
+}
+
+.embla__slide > * {
+  height: 100%;
+}
+
+/* Thumbnail variant: vertical stacked thumbnails */
+.embla--thumb .embla__viewport {
+  height: 100%;
+}
+
+.embla--thumb .embla__container {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.embla--thumb .embla__slide {
+  min-width: 100%;
+  width: 100%;
+  flex: 0 0 auto;
+}
+
+/* Small helpers for focus/active thumbnail visuals */
+.embla--thumb button:focus,
+.embla--thumb button:hover {
+  transform: none;
+}
+
+/* Thumbnail card visual tweaks */
+.embla--thumb button {
+  background: white;
+  border-radius: 8px;
+}
+
+.embla--thumb button img {
+  border-radius: 6px;
+}
+
+/* Main image container tweaks */
+.product-gallery-center {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Reduce white space inside main gallery container */
+.embla--main .embla__viewport {
+  padding: 0;
+}
+
+.embla--main .embla__slide {
+  padding: 0;
+}
+
+.embla--main .embla__container {
+  gap: 0;
+}
+
+/* Pagination dots */
+.product-gallery-pagination button {
+  border: none;
+  display: inline-block;
+}
+
+.bg-ui-border-strong {
+  background-color: #ef4444; /* match site red */
+}
+
+.bg-ui-border-muted {
+  background-color: #d1d5db; /* gray-300 */
+}
+
 
 .hero-glass-dark {
   backdrop-filter: blur(12px) saturate(180%);

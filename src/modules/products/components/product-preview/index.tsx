@@ -1,13 +1,15 @@
 "use client"
 
 import { Text } from "@medusajs/ui"
+import Image from "next/image"
 import { getProductPrice } from "@lib/util/get-product-price"
 import { HttpTypes } from "@medusajs/types"
 import LocalizedClientLink from "@modules/common/components/localized-client-link"
 import PreviewPrice from "./price"
 import AddToCartButton from "@modules/products/components/add-to-cart-button"
 import WishlistButton from "@modules/common/components/wishlist-button"
-import { ArrowsRightLeftIcon, CheckCircleIcon, ExclamationTriangleIcon, XCircleIcon, ChevronDownIcon } from "@heroicons/react/24/outline"
+import { ArrowsRightLeftIcon, CheckCircleIcon, ExclamationTriangleIcon, XCircleIcon } from "@heroicons/react/24/outline"
+import Select from "react-select"
 import { useState } from "react"
 
 export default function ProductPreview({
@@ -72,15 +74,23 @@ export default function ProductPreview({
   const stockDisplay = getStockDisplay()
 
   return (
-    <div className="max-w-sm bg-white border border-gray-200 rounded-lg shadow-sm hover:shadow-lg transition-all duration-200 overflow-hidden">
+  <div className="w-full max-w-sm sm:max-w-sm bg-white border border-gray-200 rounded-lg shadow-sm hover:shadow-lg transition-all duration-200 overflow-hidden mx-auto">
       {/* Product Image with overlays */}
       <div className="relative bg-gradient-to-br from-gray-50 to-gray-100 p-4">
         <LocalizedClientLink href={`/products/${product.handle}`} className="block">
-          <img
-            src={product.thumbnail || product.images?.[0]?.url || "/api/placeholder/300/300"}
-            alt={product.title}
-            className="w-full h-40 object-contain hover:scale-105 transition-transform duration-200"
-          />
+          <div className="relative w-full">
+            <div className="w-full pb-[100%] relative overflow-hidden">
+              <Image
+                src={product.thumbnail || product.images?.[0]?.url || "/api/placeholder/300/300"}
+                alt={product.title}
+                fill
+                sizes="300px"
+                priority
+                style={{ objectFit: 'contain' }}
+                className="transition-transform duration-200 hover:scale-105"
+              />
+            </div>
+          </div>
         </LocalizedClientLink>
         
         {/* Stock Badge */}
@@ -122,23 +132,25 @@ export default function ProductPreview({
         {variants.length > 1 && (
           <div className="mb-4">
             <label className="block text-xs font-medium text-gray-700 mb-1">Variante:</label>
-            <div className="relative">
-              <select 
-                value={selectedVariant?.id || ""} 
-                onChange={(e) => {
-                  const variant = variants.find(v => v.id === e.target.value)
-                  setSelectedVariant(variant)
-                }}
-                className="w-full pl-3 pr-8 py-2 text-sm border border-gray-300 rounded-lg bg-white focus:ring-2 focus:ring-gray-500 focus:border-gray-500 appearance-none cursor-pointer transition-colors"
-              >
-                {variants.map((variant: any) => (
-                  <option key={variant.id} value={variant.id}>
-                    {variant.title || `Variante ${variants.indexOf(variant) + 1}`}
-                  </option>
-                ))}
-              </select>
-              <ChevronDownIcon className="absolute right-2 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
-            </div>
+            <Select
+              className="swiper-no-swiping"
+              inputId={`variant-select-${product.id}`}
+              instanceId={`variant-select-${product.id}`}
+              value={selectedVariant ? { value: selectedVariant.id, label: selectedVariant.title || `Variante` } : null}
+              onChange={(v: any) => {
+                const variant = variants.find(x => x.id === v?.value)
+                setSelectedVariant(variant)
+              }}
+              options={variants.map((variant: any) => ({ value: variant.id, label: variant.title || `Variante` }))}
+              classNamePrefix="react-select"
+              menuPortalTarget={typeof document !== 'undefined' ? document.body : undefined}
+              menuPosition={'fixed'}
+              styles={{
+                control: (base: any) => ({ ...base, minHeight: 40, borderRadius: 8 }),
+                /* Keep select menus under the sticky header */
+                menuPortal: (base: any) => ({ ...base, zIndex: 40 })
+              }}
+            />
           </div>
         )}
 

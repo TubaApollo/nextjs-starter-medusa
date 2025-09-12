@@ -6,6 +6,7 @@ import ProductOnboardingCta from "@modules/products/components/product-onboardin
 import ProductTabs from "@modules/products/components/product-tabs"
 import RelatedProducts from "@modules/products/components/related-products"
 import ProductInfo from "@modules/products/templates/product-info"
+import ProductDetails from "@modules/products/components/product-details"
 import SkeletonRelatedProducts from "@modules/skeletons/templates/skeleton-related-products"
 import { notFound } from "next/navigation"
 import ProductActionsWrapper from "./product-actions-wrapper"
@@ -30,19 +31,20 @@ const ProductTemplate: React.FC<ProductTemplateProps> = ({
   return (
     <>
       <ProductVariantProvider>
+        <div className="content-container mb-1 small:mb-2">
+          <ProductInfo product={product} />
+        </div>
+
         <div
           className="content-container flex flex-col small:flex-row small:items-start py-6 relative"
           data-testid="product-container"
         >
-          <div className="flex flex-col small:sticky small:top-48 small:py-0 small:max-w-[300px] w-full py-8 gap-y-6">
-            <ProductInfo product={product} />
-            <ProductTabs product={product} />
-          </div>
-          <div className="block w-full relative">
+          <div className="block w-full relative small:w-1/2 pr-0 sm:pr-6">
             <ImageGallery images={product?.images || []} />
           </div>
-          <div className="flex flex-col small:sticky small:top-48 small:py-0 small:max-w-[300px] w-full py-8 gap-y-12">
-            <ProductOnboardingCta />
+
+          <div className="flex flex-col small:sticky small:top-0 small:py-0 small:w-1/2 w-full py-8 gap-y-6 pl-0 sm:pl-6">
+            <ProductDetails product={product} />
             <Suspense
               fallback={
                 <ProductActions
@@ -54,6 +56,8 @@ const ProductTemplate: React.FC<ProductTemplateProps> = ({
             >
               <ProductActionsWrapper id={product.id} region={region} />
             </Suspense>
+            <ProductTabs product={product} />
+            <ProductOnboardingCta />
           </div>
         </div>
       </ProductVariantProvider>

@@ -3,7 +3,7 @@
 import { addToCart } from "@lib/data/cart"
 import { useIntersection } from "@lib/hooks/use-in-view"
 import { HttpTypes } from "@medusajs/types"
-import { Button } from "@medusajs/ui"
+import { Button, clx } from "@medusajs/ui"
 import Divider from "@modules/common/components/divider"
 import OptionSelect from "@modules/products/components/product-actions/option-select"
 import { isEqual } from "lodash"
@@ -11,8 +11,12 @@ import { useParams } from "next/navigation"
 import { useEffect, useMemo, useRef, useState } from "react"
 import { AnimatePresence, motion } from "framer-motion"
 import ProductPrice from "../product-price"
+import { getProductPrice } from "@lib/util/get-product-price"
 import { useProductVariant } from "@lib/context/product-variant-context"
 import MobileActions from "./mobile-actions"
+import WishlistButton from "@modules/common/components/wishlist-button"
+import AddToCartButton from "@modules/products/components/add-to-cart-button"
+import { HeartIcon, ArrowsRightLeftIcon } from "@heroicons/react/24/outline"
 
 type ProductActionsProps = {
   product: HttpTypes.StoreProduct
@@ -169,7 +173,44 @@ export default function ProductActions({
           )}
         </div>
 
-        <ProductPrice product={product} variant={selectedVariant} />
+        <div className="flex flex-col gap-y-2">
+          <div className="flex items-end gap-4">
+            <div className="text-3xl font-bold text-ui-fg-base">
+              <ProductPrice product={product} variant={selectedVariant} />
+            </div>
+            {/* Original price / discount is rendered inside ProductPrice to avoid duplication */}
+          </div>
+          {/* Netto / tax hint */}
+          <div className="text-sm text-ui-fg-muted">
+            {(() => {
+              const prices = getProductPrice({ product, variantId: selectedVariant?.id })
+              const priceData = prices?.variantPrice || prices?.cheapestPrice
+              if (!priceData) return null
+              const netAmount = (priceData as any).net_amount
+              if (netAmount) {
+                return <div>Netto: {Number(netAmount).toLocaleString(undefined, { minimumFractionDigits: 2 })} {priceData.currency_code}</div>
+              }
+              if (priceData.calculated_price_number) {
+                const netto = (priceData.calculated_price_number / 1.19).toFixed(2)
+                return <div>Netto: €{netto}</div>
+              }
+              return null
+            })()}
+          </div>
+        </div>
+
+        {/* Stock display */}
+        <div className="mt-3">
+          {selectedVariant ? (
+            inStock ? (
+              <div className="text-sm text-green-700">Auf Lager</div>
+            ) : (
+              <div className="text-sm text-red-600">Nicht verfügbar</div>
+            )
+          ) : (
+            <div className="text-sm text-ui-fg-muted">Wähle eine Variante</div>
+          )}
+        </div>
 
         {/* Quantity selector - visible only when in stock and a valid variant is selected */}
         {inStock && selectedVariant && isValidVariant && (
@@ -179,188 +220,59 @@ export default function ProductActions({
             animate={{ opacity: 1, y: 0 }}
             transition={{ type: "spring", stiffness: 320, damping: 26 }}
           >
-            <div className="flex items-stretch w-full border border-ui-border-base rounded-rounded overflow-hidden bg-ui-bg-subtle">
-              {(() => {
-                const decDisabled = !!disabled || isAdding || quantity <= 1
-                return (
-                  <motion.button
-                    type="button"
-                    whileTap={{ scale: 0.95 }}
-                    onClick={() => {
-                      setLastDelta(-1)
-                      setQuantity((q) => Math.max(1, q - 1))
-                    }}
-                    className={`px-3 min-w-[2.5rem] h-10 flex items-center justify-center text-small-regular select-none border-r border-ui-border-base transition-colors ${
-                      decDisabled
-                        ? "text-ui-fg-muted cursor-not-allowed opacity-50"
-                        : "text-ui-fg-base hover:bg-ui-bg-base cursor-pointer"
-                    }`}
-                    aria-label="Decrease quantity"
-                    title="Decrease quantity"
-                    disabled={decDisabled}
-                  >
-                    −
-                  </motion.button>
-                )
-              })()}
-
-              <div
-                className={`relative flex-1 h-10 flex items-center justify-center transition-colors focus-within:ring-1 focus-within:ring-ui-border-strong ${
-                  isEditing ? "bg-ui-bg-base" : ""
-                }`}
-              >
-                {!isEditing && (
-                  <AnimatePresence mode="popLayout" initial={false}>
-                    <motion.span
-                      key={quantity}
-                      initial={{ y: lastDelta > 0 ? 8 : -8, opacity: 0 }}
-                      animate={{ y: 0, opacity: 1 }}
-                      exit={{ y: lastDelta > 0 ? -8 : 8, opacity: 0 }}
-                      transition={{ duration: 0.18 }}
-                      className="text-base font-medium text-ui-fg-base tabular-nums"
-                      aria-live="polite"
-                    >
-                      {quantity}
-                    </motion.span>
-                  </AnimatePresence>
-                )}
-                {/* Transparent input overlay for manual entry */}
-                <input
-                  type="number"
-                  inputMode="numeric"
-                  pattern="[0-9]*"
-                  className={`absolute inset-0 w-full h-full bg-transparent text-center text-base font-medium text-ui-fg-base tabular-nums outline-none ${
-                    isEditing ? "opacity-100" : "opacity-0"
-                  }`}
-                  min={1}
-                  max={maxQuantity}
-                  value={inputValue !== null ? inputValue : String(quantity)}
-                  placeholder="0"
-                  onChange={(e) => {
-                    const val = e.target.value
-                    // Allow empty string so user can replace the value
-                    if (val === "") {
-                      setInputValue("")
-                      return
-                    }
-                    // Only allow digits
-                    if (!/^\d+$/.test(val)) {
-                      return
-                    }
-                    setInputValue(val)
-                  }}
-                  onWheel={(e) => {
-                    // prevent accidental wheel changes
-                    e.currentTarget.blur()
-                  }}
-                  onFocus={(e) => {
-                    // Enter editing mode and select text for quick overwrite
-                    if (inputValue === null) {
-                      setInputValue(String(quantity))
-                    }
-                    // Using setTimeout to ensure selection after focus paints
-                    setTimeout(() => {
-                      try {
-                        e.currentTarget.select()
-                      } catch {}
-                    }, 0)
-                  }}
-                  onKeyDown={(e) => {
-                    if (e.key === "ArrowUp") {
-                      e.preventDefault()
-                      setLastDelta(1)
-                      setQuantity((q) => {
-                        const max = maxQuantity ?? Number.MAX_SAFE_INTEGER
-                        return Math.min(q + 1, max)
-                      })
-                      setInputValue(null)
-                    } else if (e.key === "ArrowDown") {
-                      e.preventDefault()
-                      setLastDelta(-1)
-                      setQuantity((q) => Math.max(1, q - 1))
-                      setInputValue(null)
-                    } else if (e.key === "Enter") {
-                      e.preventDefault()
-                      const parsed = parseInt((inputValue ?? String(quantity)).trim(), 10)
-                      const min = 1
-                      const max = maxQuantity ?? Number.MAX_SAFE_INTEGER
-                      const clamped = Number.isNaN(parsed)
-                        ? min
-                        : Math.min(Math.max(parsed, min), max)
-                      setLastDelta(clamped > quantity ? 1 : -1)
-                      setQuantity(clamped)
-                      setInputValue(null)
-                    }
-                  }}
-                  onBlur={() => {
-                    const parsed = parseInt((inputValue ?? String(quantity)).trim(), 10)
-                    const min = 1
-                    const max = maxQuantity ?? Number.MAX_SAFE_INTEGER
-                    const clamped = Number.isNaN(parsed)
-                      ? min
-                      : Math.min(Math.max(parsed, min), max)
-                    setLastDelta(clamped > quantity ? 1 : -1)
-                    setQuantity(clamped)
-                    setInputValue(null)
-                  }}
-                  aria-label="Quantity"
-                  title="Quantity"
-                />
+            <div className="flex items-center gap-3">
+              <div className="flex items-center border border-ui-border-base rounded-md overflow-hidden">
+                <button
+                  onClick={() => setQuantity((q) => Math.max(1, q - 1))}
+                  className="px-3 py-2 text-lg bg-white border-r border-ui-border-base hover:bg-ui-bg-base"
+                  aria-label="Decrease quantity"
+                >
+                  −
+                </button>
+                <div className="px-6 py-2 text-center min-w-[56px]">
+                  <span className="text-base font-semibold tabular-nums">{quantity}</span>
+                </div>
+                <button
+                  onClick={() => setQuantity((q) => q + 1)}
+                  className="px-3 py-2 text-lg bg-white border-l border-ui-border-base hover:bg-ui-bg-base"
+                  aria-label="Increase quantity"
+                >
+                  +
+                </button>
               </div>
-
-              {(() => {
-                const incDisabled =
-                  !!disabled ||
-                  isAdding ||
-                  (maxQuantity !== undefined && quantity >= maxQuantity)
-                return (
-                  <motion.button
-                    type="button"
-                    whileTap={{ scale: 0.95 }}
-                    onClick={() => {
-                      setLastDelta(1)
-                      setQuantity((q) => {
-                        const max = maxQuantity ?? Number.MAX_SAFE_INTEGER
-                        return Math.min(q + 1, max)
-                      })
-                    }}
-                    className={`px-3 min-w-[2.5rem] h-10 flex items-center justify-center text-small-regular select-none border-l border-ui-border-base transition-colors ${
-                      incDisabled
-                        ? "text-ui-fg-muted cursor-not-allowed opacity-50"
-                        : "text-ui-fg-base hover:bg-ui-bg-base cursor-pointer"
-                    }`}
-                    aria-label="Increase quantity"
-                    title="Increase quantity"
-                    disabled={incDisabled}
-                  >
-                    +
-                  </motion.button>
-                )
-              })()}
             </div>
           </motion.div>
         )}
 
-        <Button
-          onClick={handleAddToCart}
-          disabled={
-            !inStock ||
-            !selectedVariant ||
-            !!disabled ||
-            isAdding ||
-            !isValidVariant
-          }
-          variant="primary"
-          className="w-full h-10"
-          isLoading={isAdding}
-          data-testid="add-product-button"
-        >
-          {!selectedVariant && !options
-            ? "Select variant"
-            : !inStock || !isValidVariant
-            ? "Out of stock"
-            : "Add to cart"}
-        </Button>
+        <div className="flex flex-col gap-3">
+          <AddToCartButton
+            variant={selectedVariant}
+            quantity={quantity}
+            disabled={!inStock || !selectedVariant || !!disabled || !isValidVariant}
+            className="w-full py-4 bg-yellow-400 hover:bg-yellow-500 text-black font-semibold rounded-lg shadow-md"
+          />
+
+          <button
+            onClick={() => {
+              // Placeholder for buy-now flow
+            }}
+            className="w-full py-3 bg-orange-500 hover:bg-orange-600 text-white font-semibold rounded-lg shadow-sm"
+            data-testid="buy-now-button"
+          >
+            Jetzt kaufen
+          </button>
+
+          <div className="flex items-center gap-3">
+            <button className="flex-1 py-2 px-4 border border-ui-border-base rounded-md bg-white text-sm flex items-center justify-center gap-2">
+              <HeartIcon className="h-4 w-4" />
+              Zur Wunschliste
+            </button>
+            <button className="flex-1 py-2 px-4 border border-ui-border-base rounded-md bg-white text-sm flex items-center justify-center gap-2">
+              <ArrowsRightLeftIcon className="h-4 w-4" />
+              Zur Vergleichsliste
+            </button>
+          </div>
+        </div>
         <MobileActions
           product={product}
           variant={selectedVariant}

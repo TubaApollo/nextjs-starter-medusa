@@ -1,6 +1,6 @@
 import { HttpTypes } from "@medusajs/types"
-import { clx } from "@medusajs/ui"
 import React from "react"
+import Select from "react-select"
 
 type OptionSelectProps = {
   option: HttpTypes.StoreProductOption
@@ -19,35 +19,34 @@ const OptionSelect: React.FC<OptionSelectProps> = ({
   "data-testid": dataTestId,
   disabled,
 }) => {
-  const filteredOptions = (option.values ?? []).map((v) => v.value)
+  const values = option.values ?? []
+
+  const optionsForSelect = values.map((v) => ({ value: v.value, label: v.value }))
 
   return (
-    <div className="flex flex-col gap-y-3">
-      <span className="text-sm">Select {title}</span>
-      <div
-        className="flex flex-wrap justify-between gap-2"
-        data-testid={dataTestId}
-      >
-        {filteredOptions.map((v) => {
-          return (
-            <button
-              onClick={() => updateOption(option.id, v)}
-              key={v}
-              className={clx(
-                "border-ui-border-base bg-ui-bg-subtle border text-small-regular h-10 rounded-rounded p-2 flex-1 ",
-                {
-                  "border-ui-border-interactive": v === current,
-                  "hover:shadow-elevation-card-rest transition-shadow ease-in-out duration-150":
-                    v !== current,
-                }
-              )}
-              disabled={disabled}
-              data-testid="option-button"
-            >
-              {v}
-            </button>
-          )
-        })}
+    <div className="flex flex-col gap-y-2">
+      <label className="text-sm font-medium" htmlFor={`opt-${option.id}`}>{title}</label>
+      <div className="mt-1">
+        <Select
+          className="swiper-no-swiping"
+          inputId={`opt-${option.id}`}
+          isDisabled={disabled}
+          value={current ? { value: current, label: current } : null}
+          onChange={(val: any) => updateOption(option.id, val?.value ?? '')}
+          options={optionsForSelect}
+          placeholder="Bitte wählen"
+          instanceId={`opt-${option.id}`}
+          classNamePrefix="react-select"
+          menuPortalTarget={typeof document !== 'undefined' ? document.body : undefined}
+          menuPosition={'fixed'}
+          menuPlacement={'auto'}
+          styles={{
+            control: (base: any) => ({ ...base, borderRadius: 6, borderColor: '#e5e7eb', minHeight: 40 }),
+            valueContainer: (base: any) => ({ ...base, padding: '0 8px' }),
+            /* Keep select menus under the sticky header (z-50) so header remains on top */
+            menuPortal: (base: any) => ({ ...base, zIndex: 40 }),
+          }}
+        />
       </div>
     </div>
   )

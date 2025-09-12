@@ -108,9 +108,9 @@ const CategoryGrid: React.FC<CategoryGridProps> = ({ categories }) => {
           </div>
         </div>
 
-        {/* Category Grid - 5 columns layout */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
-          {categories.slice(0, 15).map((category, index) => (
+  {/* Category Grid - responsive columns (as before), but limit to two rows worth of items */}
+  <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
+          {categories.slice(0, 10).map((category, index) => (
             <div key={category.id}>
               <CategoryCard category={category} />
             </div>

@@ -24,6 +24,19 @@ const CartDropdown = ({ cart: cartState }: CartDropdownProps) => {
   const [cartDropdownOpen, setCartDropdownOpen] = useState(false)
   const [autoCloseTimer, setAutoCloseTimer] = useState<NodeJS.Timeout | undefined>()
   const autoCloseRef = useRef<NodeJS.Timeout | null>(null)
+  const ignoreNextOpenRef = useRef(false)
+  const triggerRef = useRef<HTMLButtonElement | null>(null)
+
+  const isTriggerVisible = () => {
+    try {
+      if (!triggerRef.current) return false
+      // element is visible if it has non-zero bounding rect and is in the document flow
+      const rect = triggerRef.current.getBoundingClientRect()
+      return rect.width > 0 && rect.height > 0
+    } catch (e) {
+      return false
+    }
+  }
 
   const pathname = usePathname()
   const previousTotalItems = useRef(cartState?.items?.reduce((acc, item) => acc + item.quantity, 0) ?? 0)
@@ -37,6 +50,9 @@ const CartDropdown = ({ cart: cartState }: CartDropdownProps) => {
 
   // Opens dropdown and sets a timer to auto-close it after 5 seconds
   const openWithTimeout = () => {
+    // Only open if the trigger is currently visible (prevents duplicate popovers
+    // when desktop and mobile instances both exist in DOM)
+    if (!isTriggerVisible()) return
     openDropdown()
     if (autoCloseRef.current) clearTimeout(autoCloseRef.current)
     autoCloseRef.current = setTimeout(closeDropdown, 5000)
@@ -50,6 +66,7 @@ const CartDropdown = ({ cart: cartState }: CartDropdownProps) => {
   // Opens dropdown and clears any existing auto-close timer
   const openAndClearTimeout = () => {
     if (autoCloseRef.current) clearTimeout(autoCloseRef.current)
+    if (!isTriggerVisible()) return
     openDropdown()
   }
 
@@ -63,6 +80,15 @@ const CartDropdown = ({ cart: cartState }: CartDropdownProps) => {
   // Automatically open dropdown when total items change (except on /cart page)
   useEffect(() => {
     if (mounted.current) {
+      // If a deletion originated from inside the dropdown we may want to
+      // suppress the automatic re-open triggered by the totalItems change.
+      if (ignoreNextOpenRef.current) {
+        ignoreNextOpenRef.current = false
+        // sync previousTotalItems and skip opening
+        previousTotalItems.current = totalItems
+        return
+      }
+
       if (previousTotalItems.current !== totalItems && !pathname.includes("/cart")) {
         openWithTimeout()
       }
@@ -74,7 +100,9 @@ const CartDropdown = ({ cart: cartState }: CartDropdownProps) => {
 
   // Open on global event (from AddToCartButton)
   useEffect(() => {
-    const handler = () => openWithTimeout()
+    const handler = () => {
+      if (isTriggerVisible()) openWithTimeout()
+    }
     window.addEventListener("open-cart-dropdown", handler)
     return () => window.removeEventListener("open-cart-dropdown", handler)
   }, [])
@@ -94,7 +122,7 @@ const CartDropdown = ({ cart: cartState }: CartDropdownProps) => {
     <Popover open={cartDropdownOpen} onOpenChange={setCartDropdownOpen}>
       <div className="relative flex items-center justify-center h-12 w-12 group">
           <PopoverTrigger asChild>
-          <button
+            <button
             aria-label="Warenkorb"
             className="flex items-center justify-center h-10 w-10 transition-colors text-gray-600 hover:text-gray-900 focus:outline-none"
             onClick={() => router.push('/cart')}
@@ -106,6 +134,7 @@ const CartDropdown = ({ cart: cartState }: CartDropdownProps) => {
             }}
             data-testid="nav-cart-link"
             style={{ background: 'none', boxShadow: 'none', border: 'none', padding: 0 }}
+              ref={(el) => (triggerRef.current = el)}
           >
               <div className="relative">
               <ShoppingBagIcon className="w-7 h-7" />
@@ -174,7 +203,17 @@ const CartDropdown = ({ cart: cartState }: CartDropdownProps) => {
 
                       {/* delete button positioned outside the thumbnail at bottom-right of the item */}
                       <div className="absolute bottom-2 right-2 z-10">
-                        <DeleteButton id={item.id} className="h-8 w-8 p-0 bg-white/90 hover:bg-white shadow-sm opacity-0 group-hover:opacity-100 transition-opacity" data-testid="cart-item-remove-button" />
+                        <DeleteButton
+                          id={item.id}
+                          className="h-8 w-8 p-0 bg-white/90 hover:bg-white shadow-sm opacity-0 group-hover:opacity-100 transition-opacity"
+                          data-testid="cart-item-remove-button"
+                          onDeleted={(_updatedCart) => {
+                            // Prevent the automatic re-open triggered by the items count change
+                            ignoreNextOpenRef.current = true
+                            // Close the dropdown after deletion to avoid PopoverContent losing its trigger
+                            setCartDropdownOpen(false)
+                          }}
+                        />
                       </div>
                     </div>
                   ))}
